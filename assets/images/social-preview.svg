@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#071527"/>
+      <stop offset="50%" stop-color="#0b274f"/>
+      <stop offset="100%" stop-color="#18478b"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8ec1ff"/>
+      <stop offset="100%" stop-color="#2a73ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1040" cy="120" r="120" fill="rgba(255,255,255,0.08)"/>
+  <circle cx="160" cy="520" r="180" fill="rgba(95,164,255,0.12)"/>
+  <g transform="translate(96 110)">
+    <rect width="108" height="108" rx="28" fill="#081a33" stroke="rgba(255,255,255,0.2)"/>
+    <path d="M26 67c8-20 24-33 46-33 10 0 19 2 29 7l-9 15c-6-3-12-5-19-5-14 0-26 7-33 18 5 9 15 15 27 15 10 0 18-4 25-10l12 12c-10 11-23 17-38 17-18 0-33-7-41-20-2-2-2-5 1-8Z" fill="url(#card)"/>
+  </g>
+  <text x="96" y="300" fill="#bfd8ff" font-family="Avenir Next, Segoe UI, sans-serif" font-size="28" letter-spacing="5">CREDITCOSTGUIDE</text>
+  <text x="96" y="380" fill="#ffffff" font-family="Avenir Next, Segoe UI, sans-serif" font-size="72" font-weight="800">Borrowing costs,</text>
+  <text x="96" y="456" fill="#ffffff" font-family="Avenir Next, Segoe UI, sans-serif" font-size="72" font-weight="800">fees, and payoff math</text>
+  <text x="96" y="528" fill="#dbe8ff" font-family="Avenir Next, Segoe UI, sans-serif" font-size="34">U.S.-focused guides and calculators for credit cards, loans, banking, mortgages, and debt payoff.</text>
+  <g transform="translate(830 182)">
+    <rect width="250" height="170" rx="32" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.16)"/>
+    <text x="28" y="52" fill="#dbe8ff" font-family="Avenir Next, Segoe UI, sans-serif" font-size="22">Monthly payment review</text>
+    <text x="28" y="98" fill="#ffffff" font-family="Avenir Next, Segoe UI, sans-serif" font-size="54" font-weight="800">$1,742</text>
+    <path d="M30 128 L72 112 L120 119 L164 92 L218 78" fill="none" stroke="#8ec1ff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

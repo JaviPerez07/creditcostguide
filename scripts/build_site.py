@@ -13,6 +13,7 @@ from typing import Dict, List, Tuple
 SITE_NAME = "CreditCostGuide"
 DOMAIN = "https://creditcostguide.com"
 TARGET = Path("/Users/javiperezz7/Documents/creditcostguide")
+ADSENSE_SCRIPT = '<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3733223915347669" crossorigin="anonymous"></script>'
 
 
 PILLARS = [
@@ -779,6 +780,7 @@ def html_doc(
           <meta name="twitter:title" content="{html.escape(title)}">
           <meta name="twitter:description" content="{html.escape(description)}">
           <meta name="twitter:image" content="{DOMAIN}/assets/images/social-preview.svg">
+          {ADSENSE_SCRIPT}
           <link rel="icon" href="{DOMAIN}/assets/icons/favicon.svg" type="image/svg+xml">
           <link rel="stylesheet" href="{DOMAIN}/styles.css">
         </head>
@@ -1891,6 +1893,38 @@ def build() -> None:
             hero_summary=desc if path != "index.html" else "Explore a modern fintech-style library of educational guides and calculators covering U.S. credit, loans, mortgages, banking, refinancing, and debt payoff.",
         )
         write(TARGET / path, doc)
+
+    not_found_body = trim(
+        f"""
+        <section class="ccg-section">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Missing Page</p>
+            <h2>The page you requested could not be found</h2>
+          </div>
+          <p>The address may be outdated, the page may have moved, or the link may have been entered incorrectly. Use the links below to continue exploring CreditCostGuide.</p>
+          <div class="ccg-related-grid">
+            <a class="ccg-related-card" href="{url_for('index.html')}"><span>Home</span><strong>Return to the homepage</strong></a>
+            <a class="ccg-related-card" href="{url_for('pages/personal-loans-guide.html')}"><span>Guide</span><strong>Read the personal loans guide</strong></a>
+            <a class="ccg-related-card" href="{url_for('pages/loan-payment-calculator.html')}"><span>Calculator</span><strong>Open the loan payment calculator</strong></a>
+            <a class="ccg-related-card" href="{url_for('contact.html')}"><span>Support</span><strong>Visit the contact page</strong></a>
+          </div>
+        </section>
+        """
+    )
+    write(
+        TARGET / "404.html",
+        html_doc(
+            path="404.html",
+            title="Page Not Found | CreditCostGuide",
+            description="The requested CreditCostGuide page could not be found. Browse guides, calculators, and key finance topics from the main site sections.",
+            page_type="article",
+            main_content=not_found_body,
+            breadcrumbs=breadcrumb_items("404.html", "Page Not Found"),
+            faqs=[],
+            hero_title="Page not found",
+            hero_summary="Use the navigation below to return to credit, loan, mortgage, and debt payoff resources.",
+        ),
+    )
 
     write(TARGET / "styles.css", styles_css())
     write(TARGET / "main.js", main_js())

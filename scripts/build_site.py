@@ -176,11 +176,11 @@ AUTHOR = {
 
 NAV_ITEMS = [
     ("/", "Home"),
-    ("/pages/personal-loans-guide.html", "Personal Loans"),
-    ("/pages/credit-cards-guide.html", "Credit Cards"),
-    ("/pages/mortgage-guide.html", "Mortgages"),
-    ("/pages/debt-payoff-guide.html", "Debt Payoff"),
-    ("/pages/loan-payment-calculator.html", "Calculators"),
+    ("/pages/personal-loans-guide", "Personal Loans"),
+    ("/pages/credit-cards-guide", "Credit Cards"),
+    ("/pages/mortgage-guide", "Mortgages"),
+    ("/pages/debt-payoff-guide", "Debt Payoff"),
+    ("/pages/loan-payment-calculator", "Calculators"),
 ]
 
 
@@ -192,10 +192,14 @@ def title_from_path(path: str) -> str:
     return " ".join(word.capitalize() for word in slug.split())
 
 
-def url_for(path: str) -> str:
+def public_path(path: str) -> str:
     if path == "index.html":
-        return f"{DOMAIN}/"
-    return f"{DOMAIN}/{path}"
+        return "/"
+    return f"/{path.removesuffix('.html')}"
+
+
+def url_for(path: str) -> str:
+    return f"{DOMAIN}{public_path(path)}"
 
 
 def local_href(path: str) -> str:
@@ -222,9 +226,9 @@ def words(text: str) -> int:
 def breadcrumb_items(path: str, page_title: str) -> List[Dict[str, str]]:
     items = [{"name": "Home", "url": f"{DOMAIN}/"}]
     if path.startswith("pages/"):
-        items.append({"name": "Guides", "url": f"{DOMAIN}/pages/personal-loans-guide.html"})
+        items.append({"name": "Guides", "url": url_for("pages/personal-loans-guide.html")})
     elif path not in {"index.html"}:
-        items.append({"name": "Company", "url": f"{DOMAIN}/about.html"})
+        items.append({"name": "Company", "url": url_for("about.html")})
     if path != "index.html":
         items.append({"name": page_title, "url": url_for(path)})
     return items
@@ -671,8 +675,9 @@ def home_body() -> str:
 
 
 def header(active_path: str) -> str:
+    active_public = public_path(active_path)
     nav = "".join(
-        f'<a class="{"is-active" if (item[0] == "/" and active_path == "index.html") or item[0].lstrip("/") == active_path else ""}" href="{html.escape(DOMAIN if item[0] == "/" else DOMAIN + item[0])}">{html.escape(item[1])}</a>'
+        f'<a class="{"is-active" if item[0] == active_public else ""}" href="{html.escape(f"{DOMAIN}{item[0]}" if item[0] != "/" else f"{DOMAIN}/")}">{html.escape(item[1])}</a>'
         for item in NAV_ITEMS
     )
     return trim(

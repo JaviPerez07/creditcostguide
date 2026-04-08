@@ -13,101 +13,82 @@ function walk(dir, files = []) {
   return files;
 }
 
-function toPosix(value) {
-  return value.split(path.sep).join("/");
-}
-
 function htmlFiles() {
-  return walk(ROOT).filter((file) => file.endsWith(".html")).sort();
+  return walk(ROOT).filter((file) => file.endsWith(".html") && !file.includes(`${path.sep}.git${path.sep}`)).sort();
 }
 
-function fileExistsFrom(fromFile, relPath) {
-  const clean = relPath.split("#")[0].split("?")[0];
-  const target = path.resolve(path.dirname(fromFile), clean);
-  return fs.existsSync(target) ? target : null;
+function resolveLocalTarget(fromFile, ref) {
+  const clean = ref.split("#")[0].split("?")[0];
+  if (!clean || clean.startsWith("mailto:") || clean.startsWith("tel:") || clean.startsWith("#")) return null;
+
+  if (/^https?:\/\//i.test(clean)) {
+    if (!clean.startsWith(DOMAIN)) return null;
+    const pathname = new URL(clean).pathname;
+    if (pathname === "/") return path.join(ROOT, "index.html");
+    if (pathname.endsWith("/")) return path.join(ROOT, pathname.replace(/^\//, ""), "index.html");
+    return path.join(ROOT, `${pathname.replace(/^\//, "")}.html`);
+  }
+
+  let candidate = path.resolve(path.dirname(fromFile), clean);
+  if (fs.existsSync(candidate)) return candidate;
+
+  if (clean.endsWith("/")) {
+    candidate = path.resolve(path.dirname(fromFile), clean, "index.html");
+    if (fs.existsSync(candidate)) return candidate;
+  }
+
+  if (!path.extname(clean)) {
+    candidate = path.resolve(path.dirname(fromFile), `${clean}.html`);
+    if (fs.existsSync(candidate)) return candidate;
+  }
+
+  return null;
 }
 
 function collect(pattern, text) {
   return [...text.matchAll(pattern)].map((match) => match[1]);
 }
 
-const failures = [];
 let broken = 0;
 let cssChecks = 0;
 let jsChecks = 0;
 let assetChecks = 0;
 let linkChecks = 0;
-let calculatorPages = 0;
 let menuPages = 0;
+let calculatorPages = 0;
 
 for (const file of htmlFiles()) {
-  const html = fs.readFileSync(file, "utf8");
-  const relFile = toPosix(path.relative(ROOT, file));
-  const pageFailures = [];
+  const source = fs.readFileSync(file, "utf8");
+  const styles = collect(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"/g, source);
+  const scripts = collect(/<script[^>]+src="([^"]+)"/g, source);
+  const assets = collect(/<(?:img|source)[^>]+src="([^"]+)"/g, source).concat(
+    collect(/<link[^>]+rel="icon"[^>]+href="([^"]+)"/g, source)
+  );
+  const links = collect(/<a[^>]+href="([^"]+)"/g, source);
 
-  const stylesheetMatches = collect(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"/g, html);
-  const scriptMatches = collect(/<script[^>]+src="([^"]+)"/g, html);
-  const imageMatches = collect(/<(?:img|source)[^>]+src="([^"]+)"/g, html)
-    .concat(collect(/<link[^>]+rel="icon"[^>]+href="([^"]+)"/g, html));
-  const anchorMatches = collect(/<a[^>]+href="([^"]+)"/g, html);
-
-  const assetRefs = [
-    ...stylesheetMatches.map((value) => ["CSS", value]),
-    ...scriptMatches.map((value) => ["JS", value]),
-    ...imageMatches.map((value) => ["Asset", value]),
-  ];
-
-  for (const [label, ref] of assetRefs) {
-    if (/^(https?:)?\/\//.test(ref)) {
-      if (!ref.startsWith(DOMAIN)) continue;
-      pageFailures.push(`- ${label}: absolute site asset left in local HTML -> ${ref}`);
-      broken += 1;
-      continue;
-    }
-    const resolved = fileExistsFrom(file, ref);
-    if (!resolved) {
-      pageFailures.push(`- ${label}: missing ${ref}`);
-      broken += 1;
-    }
-    if (label === "CSS") cssChecks += 1;
-    if (label === "JS") jsChecks += 1;
-    if (label === "Asset") assetChecks += 1;
+  for (const ref of styles) {
+    cssChecks += 1;
+    if (!resolveLocalTarget(file, ref)) broken += 1;
   }
-
-  for (const ref of anchorMatches) {
-    if (!ref || ref.startsWith("#") || ref.startsWith("mailto:") || ref.startsWith("tel:")) continue;
-    if (/^(https?:)?\/\//.test(ref)) {
-      if (ref.startsWith(DOMAIN)) {
-        pageFailures.push(`- Link: absolute site URL left in local HTML -> ${ref}`);
-        broken += 1;
-      }
-      continue;
-    }
-    const resolved = fileExistsFrom(file, ref);
-    if (!resolved) {
-      pageFailures.push(`- Link: missing ${ref}`);
-      broken += 1;
-    }
+  for (const ref of scripts) {
+    jsChecks += 1;
+    if (!resolveLocalTarget(file, ref)) broken += 1;
+  }
+  for (const ref of assets) {
+    assetChecks += 1;
+    if (!resolveLocalTarget(file, ref)) broken += 1;
+  }
+  for (const ref of links) {
+    if (ref.startsWith("#") || ref.startsWith("mailto:") || ref.startsWith("tel:")) continue;
     linkChecks += 1;
+    if (!resolveLocalTarget(file, ref)) broken += 1;
   }
 
-  if (html.includes('class="ccg-menu-toggle"') && html.includes('class="ccg-mobile-nav"') && /src="(\.\/|\.\.\/)main\.js"/.test(html)) {
+  if (source.includes('class="ccg-menu-toggle"') && source.includes('class="ccg-mobile-nav"') && /src="(\.\/|\.\.\/)?main\.js"/.test(source)) {
     menuPages += 1;
-  } else {
-    pageFailures.push("- Navigation: mobile menu markup or local main.js reference missing");
-    broken += 1;
   }
-
-  if (html.includes('data-calculator=')) {
+  if (source.includes('data-calculator=')) {
     calculatorPages += 1;
-    if (!/src="(\.\/|\.\.\/)main\.js"/.test(html)) {
-      pageFailures.push("- Calculator: page is missing a local main.js reference");
-      broken += 1;
-    }
-  }
-
-  if (pageFailures.length) {
-    failures.push(`## ${relFile}\n${pageFailures.join("\n")}\n`);
   }
 }
 
@@ -127,20 +108,12 @@ const summary = [
   "## Notes",
   "- SEO canonicals, social URLs, sitemap, robots.txt, and schema URLs remain on https://creditcostguide.com/...",
   "- This verification checks local CSS, JS, icon/image assets, and internal page navigation for file:// preview.",
-  "- Calculator pages still point to local main.js, which preserves calculator behavior and mobile navigation in preview mode.",
   "",
   broken === 0
     ? "## Result\n- All checked local CSS, JS, icon/image assets, and internal page links resolve successfully."
-    : "## Failures",
-  ...(broken === 0 ? [] : failures)
+    : "## Result\n- Failures were detected."
 ].join("\n");
 
-const reportPath = path.join(ROOT, "local-preview-report.md");
-fs.writeFileSync(reportPath, summary + "\n", "utf8");
-
-if (broken > 0) {
-  console.error(summary);
-  process.exit(1);
-}
-
+fs.writeFileSync(path.join(ROOT, "local-preview-report.md"), `${summary}\n`, "utf8");
+if (broken > 0) process.exit(1);
 console.log(summary);

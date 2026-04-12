@@ -13,7 +13,6 @@
 ## Notes
 - SEO canonicals, social URLs, sitemap, robots.txt, and schema URLs remain on https://creditcostguide.com/...
 - This verification checks local CSS, JS, icon/image assets, and internal page navigation for file:// preview.
-- Calculator pages still point to local main.js, which preserves calculator behavior and mobile navigation in preview mode.
 
 ## Result
 - All checked local CSS, JS, icon/image assets, and internal page links resolve successfully.

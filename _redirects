@@ -1,9 +1,6 @@
-http://creditcostguide.com/* https://creditcostguide.com/:splat 301
-http://www.creditcostguide.com/* https://creditcostguide.com/:splat 301
-https://www.creditcostguide.com/* https://creditcostguide.com/:splat 301
-https://creditcostguide.com/index.html / 301
-https://creditcostguide.com/pages/debt-payoff-guide.html /pages/debt-payoff-guide 301
-https://creditcostguide.com/pages/loan-payment-calculator.html /pages/loan-payment-calculator 301
-https://creditcostguide.com/pages/mortgage-guide.html /pages/mortgage-guide 301
-https://creditcostguide.com/pages/credit-cards-guide.html /pages/credit-cards-guide 301
-https://creditcostguide.com/pages/personal-loans-guide.html /pages/personal-loans-guide 301
+# HTTP+www to HTTPS non-www
+http://www.creditcostguide.com/* https://creditcostguide.com/:splat 301!
+# www to non-www
+https://www.creditcostguide.com/* https://creditcostguide.com/:splat 301!
+# HTTP to HTTPS
+http://creditcostguide.com/* https://creditcostguide.com/:splat 301!

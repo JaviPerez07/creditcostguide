@@ -237,6 +237,7 @@ function wireCalculators() {
 
 function injectSchema() {
   const body = document.body;
+  if (body && body.dataset.disableDynamicSchema === "true") return;
   const breadcrumbs = parseJSON(body.dataset.breadcrumbs, []);
   const faqs = parseJSON(body.dataset.faqs, []);
   const canonical = document.querySelector('link[rel="canonical"]')?.href || location.href;

@@ -23,33 +23,13 @@ function rootPrefix() {
   return path.slice(0, idx + marker.length);
 }
 
-function cleanPathnameToFile(pathname) {
-  if (!pathname || pathname === "/") return "/index.html";
-  if (pathname.endsWith("/")) return `${pathname}index.html`;
-  if (/\.[a-z0-9]+$/i.test(pathname)) return pathname;
-  return `${pathname}.html`;
-}
-
-function localTargetFromHref(href) {
-  if (!href) return null;
-  if (/^(mailto:|tel:|#)/i.test(href)) return null;
-
+function localPathFromAbsolute(url) {
   try {
-    let pathname;
-    if (/^https?:/i.test(href)) {
-      const parsed = new URL(href);
-      if (parsed.origin !== site.domain) return null;
-      pathname = parsed.pathname;
-    } else {
-      const parsed = new URL(href, location.href);
-      pathname = parsed.pathname;
-      const marker = "/creditcostguide/";
-      const idx = pathname.indexOf(marker);
-      if (idx !== -1) pathname = pathname.slice(idx + marker.length - 1);
-    }
-
-    const filePath = cleanPathnameToFile(pathname);
-    return `${rootPrefix()}${filePath.replace(/^\//, "")}`;
+    const parsed = new URL(url);
+    if (parsed.origin !== site.domain) return null;
+    let pathname = parsed.pathname;
+    if (pathname === "/") pathname = "/index.html";
+    return `${rootPrefix()}${pathname.replace(/^\//, "")}`;
   } catch {
     return null;
   }
@@ -60,7 +40,7 @@ function wireLocalPreviewLinks() {
   document.addEventListener("click", (event) => {
     const anchor = event.target.closest("a[href]");
     if (!anchor) return;
-    const localTarget = localTargetFromHref(anchor.getAttribute("href"));
+    const localTarget = localPathFromAbsolute(anchor.getAttribute("href"));
     if (!localTarget) return;
     event.preventDefault();
     location.href = localTarget;
@@ -237,7 +217,6 @@ function wireCalculators() {
 
 function injectSchema() {
   const body = document.body;
-  if (body && body.dataset.disableDynamicSchema === "true") return;
   const breadcrumbs = parseJSON(body.dataset.breadcrumbs, []);
   const faqs = parseJSON(body.dataset.faqs, []);
   const canonical = document.querySelector('link[rel="canonical"]')?.href || location.href;
@@ -300,7 +279,6 @@ function injectSchema() {
       "@id": `${canonical}#article`,
       headline: title,
       description,
-      author: { "@type": "Person", name: "Maya Ellison" },
       publisher: { "@id": `${site.domain}/#organization` },
       mainEntityOfPage: canonical
     });

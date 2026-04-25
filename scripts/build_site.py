@@ -167,12 +167,8 @@ ROOT_PAGES = [
     ("disclaimer.html", "Disclaimer | CreditCostGuide", "Understand the informational-only nature of CreditCostGuide content and the limits of calculators, examples, and editorial material.", "legal"),
 ]
 
-
-AUTHOR = {
-    "name": "Maya Ellison",
-    "role": "Senior Personal Finance Editor",
-    "bio": "Maya covers borrowing costs, banking fees, mortgage pricing, and payoff strategy with a focus on plain-English explanations and realistic household budgeting.",
-}
+# TODO: contact email pending
+CONTACT_EMAIL = ""
 
 
 NAV_ITEMS = [
@@ -335,16 +331,12 @@ def faq_html(faqs: List[List[str]]) -> str:
 
 def author_box() -> str:
     return trim(
-        f"""
-        <section class="ccg-author-box" aria-label="Author information">
-          <div class="ccg-author-mark">ME</div>
-          <div>
-            <p class="ccg-author-label">Written by</p>
-            <h2>{html.escape(AUTHOR["name"])}</h2>
-            <p class="ccg-author-role">{html.escape(AUTHOR["role"])}</p>
-            <p>{html.escape(AUTHOR["bio"])}</p>
-          </div>
-        </section>
+        """
+        <div class="editorial-block">
+          <strong>Editorial Team</strong>
+          <p>Last reviewed: April 2026</p>
+          <p>This guide compiles information from public sources, official data, and industry disclosures. Content is reviewed quarterly against updated references.</p>
+        </div>
         """
     )
 
@@ -605,11 +597,6 @@ def home_body() -> str:
               <a class="ccg-button" href="{local_href('pages/loan-payment-calculator.html')}">Open Calculators</a>
               <a class="ccg-button ccg-button--ghost" href="{local_href('pages/credit-cards-guide.html')}">Read Credit Card Guide</a>
             </div>
-            <div class="ccg-metrics">
-              <div><strong>40</strong><span>Standalone pages</span></div>
-              <div><strong>5</strong><span>Working calculators</span></div>
-              <div><strong>100%</strong><span>Educational focus</span></div>
-            </div>
           </div>
           <div class="ccg-hero-visual">
             <div class="ccg-glass-card">
@@ -731,6 +718,32 @@ def footer() -> str:
     )
 
 
+def contact_email_html() -> str:
+    if CONTACT_EMAIL:
+        return trim(
+            f"""
+            <section class="ccg-section">
+              <div class="ccg-section-head">
+                <p class="ccg-kicker">Contact Details</p>
+                <h2>Contact information</h2>
+              </div>
+              <p>For editorial questions, corrections, or general feedback, email us at <a href="mailto:{html.escape(CONTACT_EMAIL)}">{html.escape(CONTACT_EMAIL)}</a>.</p>
+            </section>
+            """
+        )
+    return trim(
+        """
+        <section class="ccg-section">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Contact Details</p>
+            <h2>Contact information</h2>
+          </div>
+          <p>We are updating our contact information. Please check back soon.</p>
+        </section>
+        """
+    )
+
+
 def html_doc(
     path: str,
     title: str,
@@ -784,7 +797,7 @@ def html_doc(
           <link rel="icon" href="{DOMAIN}/assets/icons/favicon.svg" type="image/svg+xml">
           <link rel="stylesheet" href="{DOMAIN}/styles.css">
         </head>
-        <body data-page-type="{html.escape(page_type)}" data-page-path="{html.escape(path)}" data-breadcrumbs="{breadcrumb_attr}" data-faqs="{faq_attr}">
+        <body data-page-type="{html.escape(page_type)}" data-page-path="{html.escape(public_path(path))}" data-breadcrumbs="{breadcrumb_attr}" data-faqs="{faq_attr}">
           {header(path)}
           <main class="ccg-shell">
             {breadcrumb_nav}
@@ -1089,26 +1102,20 @@ def styles_css() -> str:
         .ccg-faq-item summary { cursor: pointer; font-weight: 800; }
         .ccg-faq-item p { margin: 0.8rem 0 0; }
 
-        .ccg-author-box {
-          display: grid;
-          grid-template-columns: auto 1fr;
-          gap: 1rem;
-          padding: 1.3rem;
+        .editorial-block {
           margin-top: 1.4rem;
+          padding: 1.3rem;
+          border: 1px solid var(--ccg-line);
+          border-radius: 22px;
+          background: #fbfdff;
+          box-shadow: var(--ccg-shadow);
         }
-        .ccg-author-mark {
-          width: 64px;
-          height: 64px;
-          border-radius: 20px;
-          display: grid;
-          place-items: center;
-          background: var(--ccg-gradient);
-          color: white;
-          font-weight: 900;
+        .editorial-block strong {
+          display: block;
+          margin-bottom: 0.65rem;
+          font-size: 1.05rem;
         }
-        .ccg-author-label,
-        .ccg-author-role { margin: 0; color: var(--ccg-slate); }
-        .ccg-author-box h2 { margin: 0.15rem 0; font-size: 1.3rem; }
+        .editorial-block p { margin: 0.4rem 0 0; }
 
         .ccg-calc-card { padding: 1.2rem; display: grid; gap: 1.2rem; }
         .ccg-calc-form {
@@ -1476,7 +1483,6 @@ def main_js() -> str:
               "@id": `${canonical}#article`,
               headline: title,
               description,
-              author: { "@type": "Person", name: "Maya Ellison" },
               publisher: { "@id": `${site.domain}/#organization` },
               mainEntityOfPage: canonical
             });
@@ -1643,6 +1649,20 @@ def verification_script() -> str:
             "assets/icons/favicon.svg", "assets/icons/logo.svg", "assets/images/social-preview.svg"
         ]
 
+        def public_path(path: str) -> str:
+            if path == "index.html":
+                return "/"
+            return f"/{{path.removesuffix('.html')}}"
+
+        def local_file_for_public_url(url: str) -> Path:
+            path = url.replace(DOMAIN, "", 1) or "/"
+            if path == "/":
+                return ROOT / "index.html"
+            clean = path.lstrip("/")
+            if clean.endswith("/"):
+                clean = clean[:-1]
+            return ROOT / f"{{clean}}.html"
+
         class LinkParser(HTMLParser):
             def __init__(self):
                 super().__init__()
@@ -1692,6 +1712,8 @@ def verification_script() -> str:
                 parser = LinkParser()
                 parser.feed(file.read_text(encoding="utf-8"))
                 rel = file.relative_to(ROOT).as_posix()
+                if rel == "404.html":
+                    continue
                 expected_paths.add(rel)
                 assert_true(bool(parser.title.strip()), f"Missing title: {{rel}}", problems)
                 assert_true(bool(parser.meta_desc), f"Missing meta description: {{rel}}", problems)
@@ -1715,10 +1737,7 @@ def verification_script() -> str:
                 for link in parser.links:
                     if not link.startswith(DOMAIN):
                         continue
-                    path = link.replace(DOMAIN, "").lstrip("/") or "index.html"
-                    if link.endswith("/"):
-                        path = "index.html"
-                    assert_true((ROOT / path).exists(), f"Broken internal link in {{rel}} -> {{link}}", problems)
+                    assert_true(local_file_for_public_url(link).exists(), f"Broken internal link in {{rel}} -> {{link}}", problems)
 
             robots = (ROOT / "robots.txt").read_text(encoding="utf-8")
             assert_true("Sitemap: https://creditcostguide.com/sitemap.xml" in robots, "robots.txt missing sitemap directive", problems)
@@ -1728,7 +1747,7 @@ def verification_script() -> str:
             urls = [loc.text for loc in sitemap.findall("sm:url/sm:loc", ns)]
             assert_true(len(urls) == len(expected_paths), "sitemap.xml URL count does not match HTML file count", problems)
             for path in expected_paths:
-                loc = f"{{DOMAIN}}/" if path == "index.html" else f"{{DOMAIN}}/{{path}}"
+                loc = f"{{DOMAIN}}{{public_path(path)}}"
                 assert_true(loc in urls, f"sitemap.xml missing {{loc}}", problems)
 
             walkthrough = ROOT / "walkthrough.md"
@@ -1742,14 +1761,14 @@ def verification_script() -> str:
                 f"- Unique canonicals checked: {{len(canonicals)}}",
                 f"- Internal validation issues: {{len(problems)}}",
                 "",
-                "## AdSense Readiness Checklist",
+                "## Monetization Checklist",
                 "- Clear navigation is present across the site.",
                 "- Legal pages exist: privacy policy, terms, and disclaimer.",
                 "- Content is educational, original, and themed around U.S. consumer finance costs.",
                 "- No placeholder ad blocks were included.",
                 "- Cookie preference controls are present.",
                 "",
-                "## Search Console Checklist",
+                "## Indexing Checklist",
                 "- `sitemap.xml` is generated with absolute HTTPS URLs.",
                 "- `robots.txt` points to the sitemap.",
                 "- Each page includes a canonical URL, unique title, and unique description.",
@@ -1877,6 +1896,7 @@ def build() -> None:
         elif path == "contact.html":
             generic_related = [p for p in related_pool if p != path][:6]
             body, faqs = simple_page_body(title, desc, generic_related)
+            body += contact_email_html()
             body += contact_form_html()
         else:
             generic_related = [p for p in related_pool if p != path][:6]

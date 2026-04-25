@@ -275,26 +275,20 @@ main { padding-bottom: 5rem; }
 .ccg-faq-item summary { cursor: pointer; font-weight: 800; }
 .ccg-faq-item p { margin: 0.8rem 0 0; }
 
-.ccg-author-box {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 1rem;
-  padding: 1.3rem;
+.editorial-block {
   margin-top: 1.4rem;
+  padding: 1.3rem;
+  border: 1px solid var(--ccg-line);
+  border-radius: 22px;
+  background: #fbfdff;
+  box-shadow: var(--ccg-shadow);
 }
-.ccg-author-mark {
-  width: 64px;
-  height: 64px;
-  border-radius: 20px;
-  display: grid;
-  place-items: center;
-  background: var(--ccg-gradient);
-  color: white;
-  font-weight: 900;
+.editorial-block strong {
+  display: block;
+  margin-bottom: 0.65rem;
+  font-size: 1.05rem;
 }
-.ccg-author-label,
-.ccg-author-role { margin: 0; color: var(--ccg-slate); }
-.ccg-author-box h2 { margin: 0.15rem 0; font-size: 1.3rem; }
+.editorial-block p { margin: 0.4rem 0 0; }
 
 .ccg-calc-card { padding: 1.2rem; display: grid; gap: 1.2rem; }
 .ccg-calc-form {

@@ -19,8 +19,6 @@ ROOT = Path("/Users/javiperezz7/Documents/creditcostguide")
 PAGES_DIR = ROOT / "pages"
 DOMAIN = "https://creditcostguide.com"
 DATE = "2026-04-18"
-AUTHOR_NAME = "Maya Ellison"
-AUTHOR_ROLE = "Senior Personal Finance Editor"
 DISCLAIMER = "This content is for informational purposes only and does not constitute financial advice."
 ADSENSE = '<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3733223915347669" crossorigin="anonymous"></script>'
 
@@ -778,16 +776,12 @@ def faq_section(faqs: list[list[str]]) -> str:
 
 
 def author_box() -> str:
-    return f"""
-<section class="ccg-author-box" aria-label="Author information">
-  <div class="ccg-author-mark">ME</div>
-  <div>
-    <p class="ccg-author-label">Written by</p>
-    <h2>{AUTHOR_NAME}</h2>
-    <p class="ccg-author-role">{AUTHOR_ROLE}</p>
-    <p>Maya covers borrowing costs, banking fees, mortgage pricing, and payoff strategy with a focus on plain-English explanations and realistic household budgeting.</p>
-  </div>
-</section>"""
+    return """
+<div class="editorial-block">
+  <strong>Editorial Team</strong>
+  <p>Last reviewed: April 2026</p>
+  <p>This guide compiles information from public sources, official data, and industry disclosures. Content is reviewed quarterly against updated references.</p>
+</div>"""
 
 
 def related(page: dict) -> str:
@@ -811,7 +805,6 @@ def article_schema(page: dict) -> str:
         "@type": "Article",
         "headline": page["title"],
         "description": page["description"],
-        "author": {"@type": "Person", "name": AUTHOR_NAME, "jobTitle": AUTHOR_ROLE},
         "publisher": {
             "@type": "Organization",
             "name": "CreditCostGuide",

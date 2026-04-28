@@ -15,6 +15,20 @@ DOMAIN = "https://creditcostguide.com"
 TARGET = Path("/Users/javiperezz7/Documents/creditcostguide")
 ADSENSE_SCRIPT = '<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3733223915347669" crossorigin="anonymous"></script>'
 
+# SmartCredit (CJ) affiliate — offer IDs per link type
+SC_TRIAL_URL = "https://www.tkqlhce.com/click-101736471-17138841"
+SC_EVERGREEN_URL = "https://www.dpbolvw.net/click-101736471-16983231"
+SC_BOOST_URL = "https://www.kqzyfj.com/click-101736471-16982685"
+SC_PIXEL = '<img src="https://www.ftjcfx.com/image-101736471-17138841" width="1" height="1" border="0"/>'
+SMARTCREDIT_PAGES = {
+    "pages/credit-score-guide.html",
+    "pages/how-credit-scores-work.html",
+    "pages/best-credit-cards-for-bad-credit.html",
+    "pages/debt-payoff-guide.html",
+    "pages/credit-utilization-calculator.html",
+    "pages/how-to-lower-credit-card-interest.html",
+}
+
 
 PILLARS = [
     {
@@ -364,6 +378,106 @@ def related_html(paths: List[str]) -> str:
 
 def disclaimer_html() -> str:
     return f'<div class="ccg-disclaimer" role="note">{html.escape(DISCLAIM)}</div>'
+
+
+def sc_disclosure() -> str:
+    return (
+        '<div class="affiliate-disclosure">\n'
+        '  <p><strong>Advertiser Disclosure:</strong> This page contains affiliate links. '
+        'We may earn a commission at no extra cost to you if you click through and '
+        'make a purchase. This does not influence our editorial content.</p>\n'
+        '</div>'
+    )
+
+
+def sc_cta_primary() -> str:
+    return (
+        '<div class="smartcredit-cta-box" style="background:#f0f7ff;border:1px solid #0066cc;'
+        'border-radius:8px;padding:20px;margin:24px 0;text-align:center;">\n'
+        '  <p style="font-size:1.1em;font-weight:bold;margin-bottom:8px;">\n'
+        '    Monitor Your Credit Score \u2014 Try SmartCredit Free for 7 Days ($1)\n'
+        '  </p>\n'
+        '  <p style="margin-bottom:16px;color:#444;">\n'
+        '    SmartCredit gives you access to your full credit report, daily score\n'
+        '    monitoring, credit alerts, and identity protection tools. Start your\n'
+        '    7-day trial for just $1.\n'
+        '  </p>\n'
+        f'  <a href="{SC_TRIAL_URL}"\n'
+        '     rel="nofollow sponsored" target="_blank"\n'
+        '     style="background:#0066cc;color:#fff;padding:12px 28px;border-radius:6px;'
+        'text-decoration:none;font-weight:bold;display:inline-block;">\n'
+        '    Start 7-Day Trial for $1 \u2192\n'
+        '  </a>\n'
+        '</div>'
+    )
+
+
+def sc_cta_secondary() -> str:
+    return (
+        '<div class="smartcredit-cta-secondary" style="background:#fff8e1;border-left:4px solid '
+        '#f5a623;padding:16px 20px;margin:24px 0;">\n'
+        '  <p style="margin:0 0 10px 0;">\n'
+        '    <strong>Boost your credit score:</strong> SmartCredit members boost their\n'
+        '    score an average of 34 points.\n'
+        f'    <a href="{SC_BOOST_URL}"\n'
+        '       rel="nofollow sponsored" target="_blank">See how it works \u2192</a>\n'
+        '  </p>\n'
+        '</div>'
+    )
+
+
+def _in_tag(s: str, pos: int) -> bool:
+    """Return True if pos is inside an HTML tag (between < and >)."""
+    last_open = s.rfind('<', 0, pos)
+    last_close = s.rfind('>', 0, pos)
+    return last_open > last_close
+
+
+def smartcredit_inject(content: str) -> str:
+    """Post-process page body HTML to insert SmartCredit affiliate content."""
+    # A) Disclosure before first <section class="ccg-section">
+    sec_marker = '<section class="ccg-section">'
+    idx = content.find(sec_marker)
+    if idx != -1:
+        content = content[:idx] + sc_disclosure() + '\n' + content[idx:]
+
+    # B) CTA primary after the first </section>
+    end_idx = content.find('</section>')
+    if end_idx != -1:
+        insert_at = end_idx + len('</section>')
+        content = content[:insert_at] + '\n' + sc_cta_primary() + content[insert_at:]
+
+    # C) Contextual link: wrap first in-paragraph phrase with SmartCredit anchor
+    lower = content.lower()
+    replaced = False
+    for phrase in ('credit score', 'credit monitoring', 'credit report'):
+        start = 0
+        while not replaced:
+            pos = lower.find(phrase, start)
+            if pos == -1:
+                break
+            if not _in_tag(content, pos):
+                sc_link = f'<a href="{SC_EVERGREEN_URL}" rel="nofollow sponsored" target="_blank">SmartCredit</a>'
+                content = content[:pos] + sc_link + content[pos + len(phrase):]
+                lower = content.lower()
+                replaced = True
+            else:
+                start = pos + 1
+        if replaced:
+            break
+
+    # D) CTA secondary before FAQ section
+    faq_kicker = '<p class="ccg-kicker">FAQ</p>'
+    faq_pos = content.find(faq_kicker)
+    if faq_pos != -1:
+        faq_sec_start = content.rfind(sec_marker, 0, faq_pos)
+        if faq_sec_start != -1:
+            content = content[:faq_sec_start] + sc_cta_secondary() + '\n' + content[faq_sec_start:]
+
+    # E) Tracking pixel at end of content
+    content = content + '\n' + SC_PIXEL
+
+    return content
 
 
 def section_block(topic: str, page_title: str, index: int) -> str:
@@ -1840,6 +1954,8 @@ def build() -> None:
         path = cfg["path"]
         related = [p for p in related_pool if p != path][:6]
         body = article_body(cfg, 3000, related)
+        if path in SMARTCREDIT_PAGES:
+            body = smartcredit_inject(body)
         doc = html_doc(
             path=path,
             title=cfg["title"],
@@ -1856,6 +1972,8 @@ def build() -> None:
     for path, title, desc in SUPPORTING:
         related = [p for p in related_pool if p != path][:6]
         body, faqs = support_body(path, title, desc, related)
+        if path in SMARTCREDIT_PAGES:
+            body = smartcredit_inject(body)
         doc = html_doc(
             path=path,
             title=title,
@@ -1872,6 +1990,8 @@ def build() -> None:
     for path, title, desc, calc_type in CALCULATORS:
         related = [p for p in related_pool if p != path][:6]
         body, faqs = calculator_body(path, title, desc, calc_type, related)
+        if path in SMARTCREDIT_PAGES:
+            body = smartcredit_inject(body)
         doc = html_doc(
             path=path,
             title=title,

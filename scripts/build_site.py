@@ -391,37 +391,77 @@ def sc_disclosure() -> str:
 
 
 def sc_cta_primary() -> str:
+    """Bloque 1 — Blue trial CTA. Placed after the first </section>."""
     return (
-        '<div class="smartcredit-cta-box" style="background:#f0f7ff;border:1px solid #0066cc;'
-        'border-radius:8px;padding:20px;margin:24px 0;text-align:center;">\n'
-        '  <p style="font-size:1.1em;font-weight:bold;margin-bottom:8px;">\n'
-        '    Monitor Your Credit Score \u2014 Try SmartCredit Free for 7 Days ($1)\n'
+        '<div class="smartcredit-cta-box" style="background:#e8f4fd;border:2px solid #0066cc;'
+        'border-radius:10px;padding:28px 24px;margin:32px 0;text-align:center;">\n'
+        '  <p style="font-size:0.85em;font-weight:700;letter-spacing:0.08em;color:#0066cc;'
+        'text-transform:uppercase;margin:0 0 10px 0;">Recommended Tool</p>\n'
+        '  <p style="font-size:1.25em;font-weight:800;margin:0 0 12px 0;color:#002a6e;">\n'
+        '    Monitor Your Credit \u2014 Try SmartCredit for $1\n'
         '  </p>\n'
-        '  <p style="margin-bottom:16px;color:#444;">\n'
-        '    SmartCredit gives you access to your full credit report, daily score\n'
-        '    monitoring, credit alerts, and identity protection tools. Start your\n'
-        '    7-day trial for just $1.\n'
+        '  <p style="margin:0 0 20px 0;color:#444;max-width:520px;margin-left:auto;margin-right:auto;">\n'
+        '    Get your full credit report, daily score updates, real-time alerts, and\n'
+        '    identity-theft protection all in one place. 7-day trial for just $1.\n'
         '  </p>\n'
         f'  <a href="{SC_TRIAL_URL}"\n'
         '     rel="nofollow sponsored" target="_blank"\n'
-        '     style="background:#0066cc;color:#fff;padding:12px 28px;border-radius:6px;'
-        'text-decoration:none;font-weight:bold;display:inline-block;">\n'
+        '     style="background:#0066cc;color:#fff;padding:14px 36px;border-radius:6px;'
+        'text-decoration:none;font-weight:700;font-size:1.05em;display:inline-block;">\n'
         '    Start 7-Day Trial for $1 \u2192\n'
         '  </a>\n'
+        '  <p style="font-size:0.78em;color:#666;margin:10px 0 0 0;">'
+        'Sponsored \u00b7 Cancel anytime</p>\n'
+        '</div>'
+    )
+
+
+def sc_cta_boost() -> str:
+    """Bloque 2 — Orange boost CTA. Placed after the second </section>."""
+    return (
+        '<div class="smartcredit-cta-boost" style="background:#fff3e0;border:2px solid #e65100;'
+        'border-radius:10px;padding:28px 24px;margin:32px 0;text-align:center;">\n'
+        '  <p style="font-size:0.85em;font-weight:700;letter-spacing:0.08em;color:#e65100;'
+        'text-transform:uppercase;margin:0 0 10px 0;">Score Builder</p>\n'
+        '  <p style="font-size:1.25em;font-weight:800;margin:0 0 12px 0;color:#7a2800;">\n'
+        '    Boost Your Score an Average of 34 Points\n'
+        '  </p>\n'
+        '  <p style="margin:0 0 20px 0;color:#444;max-width:520px;margin-left:auto;margin-right:auto;">\n'
+        '    SmartCredit\u2019s ScoreBuilder\u2122 shows you exactly which accounts to pay down\n'
+        '    and by how much to maximise your credit score gains.\n'
+        '  </p>\n'
+        f'  <a href="{SC_BOOST_URL}"\n'
+        '     rel="nofollow sponsored" target="_blank"\n'
+        '     style="background:#e65100;color:#fff;padding:14px 36px;border-radius:6px;'
+        'text-decoration:none;font-weight:700;font-size:1.05em;display:inline-block;">\n'
+        '    See How ScoreBuilder Works \u2192\n'
+        '  </a>\n'
+        '  <p style="font-size:0.78em;color:#666;margin:10px 0 0 0;">Sponsored</p>\n'
         '</div>'
     )
 
 
 def sc_cta_secondary() -> str:
+    """Bloque 3 — Purple evergreen CTA. Placed before the FAQ section."""
     return (
-        '<div class="smartcredit-cta-secondary" style="background:#fff8e1;border-left:4px solid '
-        '#f5a623;padding:16px 20px;margin:24px 0;">\n'
-        '  <p style="margin:0 0 10px 0;">\n'
-        '    <strong>Boost your credit score:</strong> SmartCredit members boost their\n'
-        '    score an average of 34 points.\n'
-        f'    <a href="{SC_BOOST_URL}"\n'
-        '       rel="nofollow sponsored" target="_blank">See how it works \u2192</a>\n'
+        '<div class="smartcredit-cta-secondary" style="background:#f3e5f5;border:2px solid #7b1fa2;'
+        'border-radius:10px;padding:28px 24px;margin:32px 0;text-align:center;">\n'
+        '  <p style="font-size:0.85em;font-weight:700;letter-spacing:0.08em;color:#7b1fa2;'
+        'text-transform:uppercase;margin:0 0 10px 0;">Credit Monitoring</p>\n'
+        '  <p style="font-size:1.25em;font-weight:800;margin:0 0 12px 0;color:#38006b;">\n'
+        '    Stay on Top of Your Credit 24\u202f/\u202f7\n'
         '  </p>\n'
+        '  <p style="margin:0 0 20px 0;color:#444;max-width:520px;margin-left:auto;margin-right:auto;">\n'
+        '    SmartCredit monitors all three credit bureaus and alerts you the moment\n'
+        '    anything changes \u2014 so you can act fast before damage is done.\n'
+        '  </p>\n'
+        f'  <a href="{SC_EVERGREEN_URL}"\n'
+        '     rel="nofollow sponsored" target="_blank"\n'
+        '     style="background:#7b1fa2;color:#fff;padding:14px 36px;border-radius:6px;'
+        'text-decoration:none;font-weight:700;font-size:1.05em;display:inline-block;">\n'
+        '    Start Monitoring Now \u2192\n'
+        '  </a>\n'
+        '  <p style="font-size:0.78em;color:#666;margin:10px 0 0 0;">Sponsored</p>\n'
         '</div>'
     )
 
@@ -434,39 +474,36 @@ def _in_tag(s: str, pos: int) -> bool:
 
 
 def smartcredit_inject(content: str) -> str:
-    """Post-process page body HTML to insert SmartCredit affiliate content."""
-    # A) Disclosure before first <section class="ccg-section">
+    """Post-process page body HTML to insert SmartCredit affiliate content.
+
+    Insertion order per page:
+      A) Disclosure before the first <section class="ccg-section">
+      B) Bloque 1 (blue trial) after the first </section>
+      C) Bloque 2 (orange boost) after the second </section>
+      D) Bloque 3 (purple evergreen) before the FAQ section
+      E) Tracking pixel at the very end
+    """
     sec_marker = '<section class="ccg-section">'
+
+    # A) Disclosure before first <section class="ccg-section">
     idx = content.find(sec_marker)
     if idx != -1:
         content = content[:idx] + sc_disclosure() + '\n' + content[idx:]
 
-    # B) CTA primary after the first </section>
-    end_idx = content.find('</section>')
+    # B) Bloque 1 after the first </section>
+    end_tag = '</section>'
+    end_idx = content.find(end_tag)
     if end_idx != -1:
-        insert_at = end_idx + len('</section>')
+        insert_at = end_idx + len(end_tag)
         content = content[:insert_at] + '\n' + sc_cta_primary() + content[insert_at:]
 
-    # C) Contextual link: wrap first in-paragraph phrase with SmartCredit anchor
-    lower = content.lower()
-    replaced = False
-    for phrase in ('credit score', 'credit monitoring', 'credit report'):
-        start = 0
-        while not replaced:
-            pos = lower.find(phrase, start)
-            if pos == -1:
-                break
-            if not _in_tag(content, pos):
-                sc_link = f'<a href="{SC_EVERGREEN_URL}" rel="nofollow sponsored" target="_blank">SmartCredit</a>'
-                content = content[:pos] + sc_link + content[pos + len(phrase):]
-                lower = content.lower()
-                replaced = True
-            else:
-                start = pos + 1
-        if replaced:
-            break
+    # C) Bloque 2 after the second </section>
+    second_end_idx = content.find(end_tag, end_idx + len(end_tag) + 1 if end_idx != -1 else 0)
+    if second_end_idx != -1:
+        insert_at2 = second_end_idx + len(end_tag)
+        content = content[:insert_at2] + '\n' + sc_cta_boost() + content[insert_at2:]
 
-    # D) CTA secondary before FAQ section
+    # D) Bloque 3 before FAQ section
     faq_kicker = '<p class="ccg-kicker">FAQ</p>'
     faq_pos = content.find(faq_kicker)
     if faq_pos != -1:
@@ -1947,6 +1984,8 @@ def build() -> None:
     all_paths += [path for path, _, _ in SUPPORTING]
     all_paths += [path for path, _, _, _ in CALCULATORS]
     all_paths += [path for path, _, _, _ in ROOT_PAGES]
+    # Static review pages not generated by this script but committed alongside output
+    all_paths += ["pages/smartcredit-review.html"]
 
     related_pool = [item["path"] for item in PILLARS] + [path for path, _, _ in SUPPORTING] + [path for path, _, _, _ in CALCULATORS]
 

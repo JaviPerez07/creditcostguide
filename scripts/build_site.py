@@ -15,6 +15,17 @@ DOMAIN = "https://creditcostguide.com"
 TARGET = Path("/Users/javiperezz7/Documents/creditcostguide")
 ADSENSE_SCRIPT = '<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3733223915347669" crossorigin="anonymous"></script>'
 
+# Editorial identity — single human editor, no fictional credentials.
+EDITOR_NAME = "Javi Pérez"
+EDITOR_ROLE = "Editor, CreditCostGuide"
+EDITOR_LINKEDIN = "https://www.linkedin.com/in/javi-perez-guides"
+EDITOR_LOCATION = "Almería, Spain"
+EDITOR_PHOTO = f"{DOMAIN}/assets/images/javi-perez-guides.jpg"
+EDITOR_PHOTO_FALLBACK = f"{DOMAIN}/assets/images/social-preview.svg"
+LAST_REVIEWED = "May 2026"
+LAST_REVIEWED_ISO = "2026-05-06"
+SITEMAP_LASTMOD = "2026-05-06"
+
 # SmartCredit (CJ) affiliate — offer IDs per link type
 SC_TRIAL_URL = "https://www.tkqlhce.com/click-101736471-17138841"
 SC_EVERGREEN_URL = "https://www.dpbolvw.net/click-101736471-16983231"
@@ -192,6 +203,7 @@ PAGE_CONTENT: Dict[str, dict] = {
     "pages/credit-score-guide.html": {
         "intro_h2": "What Your Credit Score Actually Measures",
         "intro_body": (
+            "<!-- DATO PENDIENTE VERIFICAR 2026: avg U.S. FICO score; cited 715 figure from Experian 2025 consumer data. Refresh when Experian publishes 2026 release. -->"
             "<p>Your credit score is a three-digit number between 300 and 850 that lenders, "
             "landlords, and some employers use to estimate financial risk. According to "
             "Experian's 2025 consumer data, the average U.S. FICO score is 715 — solidly in "
@@ -661,7 +673,7 @@ PAGE_CONTENT: Dict[str, dict] = {
             "doesn't report your payments to all three bureaus doesn't help your score, "
             "regardless of how responsibly you use it. This guide covers the mechanics, "
             "what to expect in fees and APRs, how to actually move your score with a "
-            "secured card, and what to look for in the top options available in 2025.</p>"
+            "secured card, and what to look for in the top options available in 2026.</p>"
         ),
         "sections": [
             {
@@ -750,7 +762,7 @@ PAGE_CONTENT: Dict[str, dict] = {
             },
             {
                 "kicker": "Top Options",
-                "h2": "Best Secured Cards for Rebuilding in 2025",
+                "h2": "Best Secured Cards for Rebuilding in 2026",
                 "body": (
                     "<p>Capital One Secured Mastercard charges no annual fee, reports to "
                     "all three bureaus, and offers a $200 initial credit limit with deposit "
@@ -846,6 +858,7 @@ PAGE_CONTENT: Dict[str, dict] = {
     "pages/debt-payoff-guide.html": {
         "intro_h2": "Why Most Debt Payoff Plans Fail — and How to Fix Them",
         "intro_body": (
+            "<!-- DATO PENDIENTE VERIFICAR 2026: avg household credit card debt + avg APR; current numbers source = 2024 Federal Reserve. Update when Fed releases newer figures. -->"
             "<p>The average American household carrying credit card debt owes roughly $6,380, "
             "according to 2024 Federal Reserve data. At the current average credit card APR "
             "of 24.59% — also Federal Reserve data — that balance generates nearly $1,570 in "
@@ -1245,6 +1258,7 @@ PAGE_CONTENT: Dict[str, dict] = {
     "pages/how-to-lower-credit-card-interest.html": {
         "intro_h2": "Four Practical Ways to Reduce Your Credit Card Interest Costs",
         "intro_body": (
+            "<!-- DATO PENDIENTE VERIFICAR 2026: avg credit card APR; 24.59% figure references late-2024 Federal Reserve series. Update when newer Fed release lands. -->"
             "<p>The average credit card APR in the United States reached 24.59% in late "
             "2024, the highest since the Federal Reserve began tracking it. At that rate, "
             "a $6,000 balance that's only partially paid down each month costs over $1,470 "
@@ -1462,8 +1476,7 @@ PAGE_CONTENT: Dict[str, dict] = {
 }
 
 
-# TODO: contact email pending
-CONTACT_EMAIL = ""
+CONTACT_EMAIL = "javiperezguides@gmail.com"
 
 
 NAV_ITEMS = [
@@ -1626,12 +1639,34 @@ def faq_html(faqs: List[List[str]]) -> str:
 
 def author_box() -> str:
     return trim(
+        f"""
+        <section class="ccg-author-box editorial-byline" aria-label="Editor information">
+          <img class="editorial-byline__photo" src="{EDITOR_PHOTO}" alt="{EDITOR_NAME}" width="56" height="56" loading="lazy" onerror="this.onerror=null;this.src='{EDITOR_PHOTO_FALLBACK}';">
+          <div class="editorial-byline__body">
+            <p class="editorial-byline__name"><strong>{EDITOR_NAME}</strong> · {EDITOR_ROLE}</p>
+            <p class="editorial-byline__meta">
+              <a href="{EDITOR_LINKEDIN}" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+              · Last reviewed: {LAST_REVIEWED}
+            </p>
+            <p class="editorial-byline__note">Content is reviewed quarterly against public data from CFPB, the Federal Reserve, FDIC, BLS, and SEC. Javi is not a licensed financial advisor; nothing on this page is financial advice.</p>
+          </div>
+        </section>
         """
-        <div class="editorial-block">
-          <strong>Editorial Team</strong>
-          <p>Last reviewed: April 2026</p>
-          <p>This guide compiles information from public sources, official data, and industry disclosures. Content is reviewed quarterly against updated references.</p>
-        </div>
+    )
+
+
+def editorial_trust_block() -> str:
+    return trim(
+        f"""
+        <section class="ccg-section editorial-trust" aria-label="About the editor">
+          <img class="editorial-trust__photo" src="{EDITOR_PHOTO}" alt="{EDITOR_NAME}" width="80" height="80" loading="lazy" onerror="this.onerror=null;this.src='{EDITOR_PHOTO_FALLBACK}';">
+          <div class="editorial-trust__body">
+            <p class="ccg-kicker">Editorial Standards</p>
+            <h2>Built by {EDITOR_NAME} with public data you can verify.</h2>
+            <p>Every guide on CreditCostGuide cites primary sources — CFPB complaint data, Federal Reserve consumer surveys, FDIC bank-rate tables, and BLS inflation statistics. No financial advice, no fictional credentials, no affiliate pressure inside core editorial content.</p>
+            <p><a class="editorial-trust__link" href="{DOMAIN}/about">Read our editorial standards →</a></p>
+          </div>
+        </section>
         """
     )
 
@@ -2062,6 +2097,167 @@ def simple_page_body(title: str, desc: str, related_paths: List[str], legal: boo
     return content, faqs
 
 
+def about_body(related_paths: List[str]) -> Tuple[str, List[List[str]]]:
+    faqs = [
+        ["Who runs CreditCostGuide?",
+         f"{EDITOR_NAME}, a technology professional and editorial site builder based in {EDITOR_LOCATION}, runs the site as an independent education project. Javi is not a licensed financial advisor, CPA, CFP, or loan officer."],
+        ["Does CreditCostGuide give financial advice?",
+         "No. The content is educational. It explains how borrowing costs, fees, and credit scoring work, using public data from CFPB, the Federal Reserve, FDIC, BLS, and SEC. Always consult a licensed professional for decisions about your situation."],
+        ["How can I reach the editor?",
+         f"Email {CONTACT_EMAIL} for editorial questions, corrections, or partnership inquiries. The site does not collect reader data through the contact form in this static demo build."],
+    ]
+    body = trim(
+        f"""
+        <section class="ccg-section">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">About</p>
+            <h2>Who runs this site</h2>
+          </div>
+          <p>CreditCostGuide was created by <strong>{EDITOR_NAME}</strong>, a technology professional and editorial site builder based in {EDITOR_LOCATION}. Javi builds independent financial-education sites that help U.S. consumers compare borrowing costs using verified public data — not affiliate-driven product recommendations.</p>
+          <p><strong>Important disclaimer:</strong> {EDITOR_NAME} is <em>not</em> a licensed financial advisor, CPA, CFP, or loan officer. Nothing on this site constitutes financial, legal, or tax advice. Consult a licensed professional for guidance specific to your situation.</p>
+          <p>Connect with the editor: <a href="{EDITOR_LINKEDIN}" target="_blank" rel="noopener noreferrer">{EDITOR_LINKEDIN}</a></p>
+        </section>
+        <section class="ccg-section ccg-section--soft">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Coverage</p>
+            <h2>What this site covers</h2>
+          </div>
+          <p>CreditCostGuide is organized around the major U.S. consumer-finance cost categories, each anchored by a long-form pillar guide and supported by calculators and explainer articles:</p>
+          <ul>
+            <li><strong>Personal loans</strong> — APRs, origination fees, prepayment, debt consolidation.</li>
+            <li><strong>Credit cards</strong> — interest charges, annual fees, rewards math, balance transfers.</li>
+            <li><strong>Mortgages</strong> — rates, points, PMI, escrow, closing costs, affordability rules.</li>
+            <li><strong>Credit scores</strong> — how scores are calculated, how they translate to rates.</li>
+            <li><strong>Banking fees</strong> — overdrafts, ATM, wires, minimums, no-fee alternatives.</li>
+            <li><strong>Debt payoff</strong> — avalanche vs. snowball, cash-flow planning, consolidation.</li>
+            <li><strong>Refinancing</strong> — break-even math for mortgages, autos, personal, and student loans.</li>
+            <li><strong>Student loans</strong> — federal vs. private, refinancing, repayment plans.</li>
+          </ul>
+          <p>Five interactive calculators (loan payment, credit-card interest, mortgage, debt payoff, credit utilization) sit alongside the guides for quick scenario testing. All calculator math is implemented in plain JavaScript using standard amortization formulas readers can verify against any public source.</p>
+        </section>
+        <section class="ccg-section">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Method</p>
+            <h2>How we research</h2>
+          </div>
+          <p>The sourcing hierarchy on this site is deliberate, in order of precedence:</p>
+          <ol>
+            <li><strong>CFPB</strong> (Consumer Financial Protection Bureau) — complaint data, consumer protections, regulatory disclosures.</li>
+            <li><strong>Federal Reserve</strong> — interest rates, consumer surveys, household debt and credit reports.</li>
+            <li><strong>FDIC</strong> — national bank rate tables, deposit data, insurance limits.</li>
+            <li><strong>BLS</strong> (Bureau of Labor Statistics) — inflation, CPI, wage data context.</li>
+            <li><strong>SEC</strong> — investment-product disclosures and filings where relevant.</li>
+            <li>Industry reports cited explicitly when used (e.g., Experian, FICO, NerdWallet rate tables) and never as primary sources for regulated products.</li>
+          </ol>
+          <p>Pages are reviewed quarterly. The "Last reviewed" date in each editor byline reflects the most recent verification pass. When a reader emails a correction, the page is updated and the dateModified field in its Article schema is bumped immediately. See <a href="{DOMAIN}/how-we-research">our editorial methodology</a> for the full process.</p>
+        </section>
+        <section class="ccg-section ccg-section--soft">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Independence</p>
+            <h2>Editorial independence and disclosure</h2>
+          </div>
+          <p>CreditCostGuide is reader-supported via display advertising (Google AdSense) and a small number of affiliate partnerships, including SmartCredit (CJ Affiliate), which is disclosed on every page where it appears. Affiliate links are marked <code>rel="nofollow sponsored"</code> and never override editorial recommendations. We do not accept payment for placement in core guides, and we publish corrections promptly.</p>
+        </section>
+        <section class="ccg-section">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Contact</p>
+            <h2>Contact the editor</h2>
+          </div>
+          <p>For editorial questions, corrections, or partnership inquiries, email <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>
+        </section>
+        {faq_html(faqs)}
+        {author_box()}
+        {related_html(related_paths)}
+        """
+    )
+    return body, faqs
+
+
+def how_we_research_body(related_paths: List[str]) -> Tuple[str, List[List[str]]]:
+    faqs = [
+        ["What primary sources does CreditCostGuide use?",
+         "CFPB for consumer protections and complaint data, the Federal Reserve for rates and consumer surveys, FDIC for bank rate tables, BLS for inflation context, and SEC for investment-related disclosures. Industry reports are cited when used and never substituted for primary public data."],
+        ["How often is content updated?",
+         "Pages are reviewed at least quarterly. Pages with rate-sensitive numbers (mortgage averages, credit card APR averages, savings APYs) are reviewed when the underlying data sources publish updates — usually monthly for Fed series and quarterly for FDIC."],
+        ["What is the correction policy?",
+         f"Email {CONTACT_EMAIL} with the URL, the specific paragraph, and the issue. Verified corrections are applied within five business days, the editor byline is updated, and the page's dateModified field is refreshed."],
+    ]
+    body = trim(
+        f"""
+        <section class="ccg-section">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Methodology</p>
+            <h2>How CreditCostGuide researches financial costs</h2>
+          </div>
+          <p>This page documents the editorial process behind every guide and calculator. The goal is reproducibility: a reader who follows our citations should be able to land on the same primary data we used and see exactly where any numeric claim originated.</p>
+        </section>
+        <section class="ccg-section ccg-section--soft">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Sourcing Hierarchy</p>
+            <h2>Public-data sources, in order of precedence</h2>
+          </div>
+          <ol>
+            <li><strong>Consumer Financial Protection Bureau (CFPB)</strong> — primary source for consumer protection rules, complaint data, and regulated-product disclosure standards. Used for credit cards, mortgages, debt collection, overdraft practices, and student-loan servicing.</li>
+            <li><strong>Federal Reserve (Board and FRED)</strong> — primary source for interest-rate context (effective federal funds rate, prime rate), the Survey of Consumer Finances, and the Quarterly Report on Household Debt and Credit. Series IDs are cited inline where used.</li>
+            <li><strong>FDIC</strong> — bank-rate tables (national rate caps, weekly average APYs), deposit data, insurance limits. Used for checking, savings, MMA, and CD comparisons.</li>
+            <li><strong>Bureau of Labor Statistics (BLS)</strong> — Consumer Price Index for All Urban Consumers (CPI-U) and household expenditure data. Used for real-rate context and affordability framing.</li>
+            <li><strong>Securities and Exchange Commission (SEC)</strong> — investment-product disclosures and registered offerings, where they intersect with consumer borrowing decisions.</li>
+            <li><strong>Industry data</strong> (Experian, FICO, NerdWallet rate trackers, LendingTree surveys) — cited explicitly when used and treated as supplemental, never as substitutes for the regulators above.</li>
+          </ol>
+        </section>
+        <section class="ccg-section">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Update Cycle</p>
+            <h2>Review and update frequency</h2>
+          </div>
+          <p>Every guide receives a full editorial review at least every 90 days. Pages with rate-sensitive numbers are revisited when the source publishes new data:</p>
+          <ul>
+            <li><strong>Federal Reserve series</strong> (effective federal funds rate, mortgage rate averages) — checked monthly.</li>
+            <li><strong>FDIC national rates</strong> — checked when FDIC publishes the weekly update relevant to a deposit-product page.</li>
+            <li><strong>BLS CPI</strong> — referenced on inflation-context pages monthly when the new release lands.</li>
+            <li><strong>Regulatory changes</strong> (CFPB rulemakings, Fed policy actions) — applied within five business days of publication when material to a page.</li>
+          </ul>
+          <p>The "Last reviewed" date in each page's editor byline is the date of the most recent verification pass, not the original publication date.</p>
+        </section>
+        <section class="ccg-section ccg-section--soft">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Calculators</p>
+            <h2>Calculator methodology</h2>
+          </div>
+          <p>All calculators on the site use standard, publicly documented formulas:</p>
+          <ul>
+            <li><strong>Loan payment</strong> — fixed-rate amortization formula <code>P · r / (1 − (1+r)<sup>−n</sup>)</code>, where r is the periodic rate and n the number of periods.</li>
+            <li><strong>Credit card payoff</strong> — month-by-month simulation: monthly interest = balance × (APR / 12); balance reduces by (payment − interest + new charges) each month until paid.</li>
+            <li><strong>Mortgage</strong> — same amortization formula plus a monthly add-on for property tax, homeowners insurance, and PMI.</li>
+            <li><strong>Debt payoff</strong> — compares months and total interest at the minimum payment versus a planned payment, both via month-by-month simulation.</li>
+            <li><strong>Credit utilization</strong> — total balances ÷ total limits, plus per-card utilization for context.</li>
+          </ul>
+          <p>The implementation lives in <code>main.js</code> on the public site and uses no external libraries. Readers can verify the math against any public amortization reference.</p>
+        </section>
+        <section class="ccg-section">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Corrections</p>
+            <h2>Correction and feedback policy</h2>
+          </div>
+          <p>If you spot an error — a stale rate, a misquoted statistic, an outdated regulation — email <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a> with the page URL and the paragraph in question. Verified corrections are applied within five business days. We update the page's dateModified field and the editor byline so readers can see the change history at a glance.</p>
+          <p>We do not silently rewrite published numbers. When a number changes for a real-world reason (e.g., a Fed rate change), the page reflects the new value and the dateModified bumps; when a number changes because it was wrong, the correction is noted in the editor byline note for that update cycle.</p>
+        </section>
+        <section class="ccg-section ccg-section--soft">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Independence</p>
+            <h2>Editorial independence disclosure</h2>
+          </div>
+          <p>CreditCostGuide earns revenue from display advertising (Google AdSense) and from a limited set of affiliate partnerships (currently SmartCredit via CJ Affiliate). Affiliate links are marked <code>rel="nofollow sponsored"</code>, opened in a new tab, and disclosed on every page where they appear. We do not allow advertisers or affiliates to influence the recommendations, ordering, or editorial language inside our pillar guides. If a partnership ever conflicts with editorial neutrality, the partnership is dropped, not the editorial position.</p>
+          <p>The site is not a registered investment adviser. Nothing here is a recommendation to buy or sell any specific financial product. Readers should consult a licensed professional before acting on educational material.</p>
+        </section>
+        {faq_html(faqs)}
+        {author_box()}
+        {related_html(related_paths)}
+        """
+    )
+    return body, faqs
+
+
 def home_body() -> str:
     pillar_cards = "".join(
         f'<a class="ccg-topic-card" href="{local_href(item["path"])}"><span>{html.escape(item["hero"])}</span><strong>{html.escape(title_from_path(item["path"]))}</strong><p>{html.escape(item["description"])}</p></a>'
@@ -2100,6 +2296,7 @@ def home_body() -> str:
             </div>
           </div>
         </section>
+        {editorial_trust_block()}
         <section class="ccg-section ccg-section--soft">
           <div class="ccg-section-head">
             <p class="ccg-kicker">Pillar Guides</p>
@@ -2233,6 +2430,117 @@ def contact_email_html() -> str:
     )
 
 
+def build_jsonld(
+    path: str,
+    title: str,
+    description: str,
+    page_type: str,
+    breadcrumbs: List[Dict[str, str]],
+    faqs: List[List[str]] | None,
+) -> str:
+    canonical = url_for(path)
+    graph: List[Dict[str, object]] = []
+
+    publisher = {
+        "@type": "Organization",
+        "@id": f"{DOMAIN}/#organization",
+        "name": SITE_NAME,
+        "url": DOMAIN,
+        "logo": {"@type": "ImageObject", "url": f"{DOMAIN}/assets/icons/logo.svg"},
+        "email": CONTACT_EMAIL,
+        "sameAs": [EDITOR_LINKEDIN],
+    }
+    graph.append(publisher)
+
+    graph.append({
+        "@type": "WebSite",
+        "@id": f"{DOMAIN}/#website",
+        "name": SITE_NAME,
+        "url": DOMAIN,
+        "publisher": {"@id": f"{DOMAIN}/#organization"},
+        "inLanguage": "en-US",
+    })
+
+    editor = {
+        "@type": "Person",
+        "@id": f"{DOMAIN}/#editor",
+        "name": EDITOR_NAME,
+        "jobTitle": EDITOR_ROLE,
+        "url": EDITOR_LINKEDIN,
+        "sameAs": [EDITOR_LINKEDIN],
+    }
+    graph.append(editor)
+
+    graph.append({
+        "@type": "WebPage" if page_type != "home" else "WebSite",
+        "@id": f"{canonical}#page",
+        "name": title,
+        "url": canonical,
+        "description": description,
+        "isPartOf": {"@id": f"{DOMAIN}/#website"},
+        "dateModified": f"{LAST_REVIEWED_ISO}T00:00:00+00:00",
+    })
+
+    if breadcrumbs and len(breadcrumbs) > 1:
+        graph.append({
+            "@type": "BreadcrumbList",
+            "@id": f"{canonical}#breadcrumbs",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": idx + 1,
+                    "name": item["name"],
+                    "item": item["url"],
+                }
+                for idx, item in enumerate(breadcrumbs)
+            ],
+        })
+
+    if page_type == "calculator":
+        graph.append({
+            "@type": "SoftwareApplication",
+            "@id": f"{canonical}#calculator",
+            "name": title,
+            "applicationCategory": "FinanceApplication",
+            "operatingSystem": "Web",
+            "url": canonical,
+            "description": description,
+            "publisher": {"@id": f"{DOMAIN}/#organization"},
+            "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+        })
+    elif page_type != "home":
+        graph.append({
+            "@type": "Article",
+            "@id": f"{canonical}#article",
+            "headline": title,
+            "description": description,
+            "url": canonical,
+            "mainEntityOfPage": canonical,
+            "publisher": {"@id": f"{DOMAIN}/#organization"},
+            "editor": {"@id": f"{DOMAIN}/#editor"},
+            "dateModified": f"{LAST_REVIEWED_ISO}T00:00:00+00:00",
+            "image": f"{DOMAIN}/assets/images/social-preview.svg",
+            "inLanguage": "en-US",
+        })
+
+    if faqs:
+        graph.append({
+            "@type": "FAQPage",
+            "@id": f"{canonical}#faq",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": q,
+                    "acceptedAnswer": {"@type": "Answer", "text": a},
+                }
+                for q, a in faqs
+            ],
+        })
+
+    payload = {"@context": "https://schema.org", "@graph": graph}
+    return json.dumps(payload, ensure_ascii=False)
+
+
 def html_doc(
     path: str,
     title: str,
@@ -2243,14 +2551,18 @@ def html_doc(
     faqs: List[List[str]] | None = None,
     hero_title: str | None = None,
     hero_summary: str | None = None,
+    is_404: bool = False,
 ) -> str:
     canonical = url_for(path)
-    robots = "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"
-    breadcrumb_attr = html.escape(json.dumps(breadcrumbs))
-    faq_attr = html.escape(json.dumps([{"q": q, "a": a} for q, a in (faqs or [])]))
+    if is_404:
+        robots = "noindex,nofollow"
+    else:
+        robots = "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"
     hero_title = hero_title or title
     hero_summary = hero_summary or description
-    breadcrumb_nav = "" if path == "index.html" else breadcrumb_html(breadcrumbs)
+    breadcrumb_nav = "" if path == "index.html" or is_404 else breadcrumb_html(breadcrumbs)
+    adsense = "" if is_404 else ADSENSE_SCRIPT
+    jsonld_block = "" if is_404 else f'<script type="application/ld+json">{build_jsonld(path, title, description, page_type, breadcrumbs, faqs)}</script>'
     hero = trim(
         f"""
         <section class="ccg-page-hero">
@@ -2278,15 +2590,17 @@ def html_doc(
           <meta property="og:description" content="{html.escape(description)}">
           <meta property="og:url" content="{html.escape(canonical)}">
           <meta property="og:image" content="{DOMAIN}/assets/images/social-preview.svg">
+          <meta property="og:locale" content="en_US">
           <meta name="twitter:card" content="summary_large_image">
           <meta name="twitter:title" content="{html.escape(title)}">
           <meta name="twitter:description" content="{html.escape(description)}">
           <meta name="twitter:image" content="{DOMAIN}/assets/images/social-preview.svg">
-          {ADSENSE_SCRIPT}
+          {adsense}
           <link rel="icon" href="{DOMAIN}/assets/icons/favicon.svg" type="image/svg+xml">
           <link rel="stylesheet" href="{DOMAIN}/styles.css">
+          {jsonld_block}
         </head>
-        <body data-page-type="{html.escape(page_type)}" data-page-path="{html.escape(public_path(path))}" data-breadcrumbs="{breadcrumb_attr}" data-faqs="{faq_attr}">
+        <body data-page-type="{html.escape(page_type)}" data-page-path="{html.escape(public_path(path))}">
           {header(path)}
           <main class="ccg-shell">
             {breadcrumb_nav}
@@ -2294,7 +2608,7 @@ def html_doc(
             {main_content}
           </main>
           {footer()}
-          <div class="ccg-cookie-banner" hidden>
+          <div class="ccg-cookie-banner" style="display:none">
             <div>
               <strong>Cookie preferences</strong>
               <p>We use essential site storage for navigation and optional analytics preferences. You can accept or reject non-essential cookies.</p>
@@ -2606,6 +2920,66 @@ def styles_css() -> str:
         }
         .editorial-block p { margin: 0.4rem 0 0; }
 
+        .editorial-byline {
+          display: flex;
+          gap: 1rem;
+          align-items: flex-start;
+          margin-top: 2rem;
+          padding: 1.25rem 1.4rem;
+          border: 1px solid var(--ccg-line);
+          border-radius: 22px;
+          background: #fbfdff;
+          box-shadow: var(--ccg-shadow);
+        }
+        .editorial-byline__photo {
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+          object-fit: cover;
+          flex-shrink: 0;
+          border: 2px solid var(--ccg-blue-soft);
+        }
+        .editorial-byline__body { flex: 1; }
+        .editorial-byline__name { margin: 0 0 0.25rem; font-size: 1.05rem; }
+        .editorial-byline__meta {
+          margin: 0 0 0.5rem;
+          font-size: 0.92rem;
+          color: var(--ccg-slate);
+        }
+        .editorial-byline__meta a { color: var(--ccg-blue); font-weight: 700; }
+        .editorial-byline__note {
+          margin: 0;
+          font-size: 0.92rem;
+          color: var(--ccg-slate);
+          line-height: 1.55;
+        }
+
+        .editorial-trust {
+          display: grid;
+          grid-template-columns: 96px 1fr;
+          gap: 1.5rem;
+          align-items: center;
+          padding: 1.6rem;
+          border: 1px solid var(--ccg-line);
+          border-radius: 28px;
+          background: linear-gradient(135deg, #f3f8ff 0%, #ffffff 100%);
+          box-shadow: var(--ccg-shadow);
+        }
+        .editorial-trust__photo {
+          width: 96px;
+          height: 96px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 3px solid var(--ccg-blue);
+        }
+        .editorial-trust__body h2 { margin: 0.4rem 0 0.7rem; font-size: clamp(1.4rem, 3vw, 1.8rem); }
+        .editorial-trust__body p { margin: 0 0 0.5rem; }
+        .editorial-trust__link { color: var(--ccg-blue); font-weight: 800; }
+        @media (max-width: 600px) {
+          .editorial-trust { grid-template-columns: 1fr; text-align: left; }
+          .editorial-trust__photo { width: 80px; height: 80px; }
+        }
+
         .ccg-calc-card { padding: 1.2rem; display: grid; gap: 1.2rem; }
         .ccg-calc-form {
           display: grid;
@@ -2754,11 +3128,11 @@ def main_js() -> str:
           const banner = document.querySelector(".ccg-cookie-banner");
           if (!banner) return;
           const choice = localStorage.getItem("ccg-cookie-choice");
-          if (!choice) banner.hidden = false;
+          if (!choice) banner.style.display = "flex";
           banner.querySelectorAll("[data-cookie-action]").forEach((button) => {
             button.addEventListener("click", () => {
               localStorage.setItem("ccg-cookie-choice", button.dataset.cookieAction);
-              banner.hidden = true;
+              banner.style.display = "none";
             });
           });
         }
@@ -2908,93 +3282,6 @@ def main_js() -> str:
           });
         }
 
-        function injectSchema() {
-          const body = document.body;
-          const breadcrumbs = parseJSON(body.dataset.breadcrumbs, []);
-          const faqs = parseJSON(body.dataset.faqs, []);
-          const canonical = document.querySelector('link[rel="canonical"]')?.href || location.href;
-          const description = document.querySelector('meta[name="description"]')?.content || "";
-          const title = document.title;
-          const pageType = body.dataset.pageType || "article";
-          const graph = [];
-
-          graph.push({
-            "@type": pageType === "home" ? "WebSite" : "WebPage",
-            "@id": `${canonical}#page`,
-            name: title,
-            url: canonical,
-            description,
-            isPartOf: { "@id": `${site.domain}/#website` }
-          });
-
-          graph.push({
-            "@type": "Organization",
-            "@id": `${site.domain}/#organization`,
-            name: site.name,
-            url: site.domain,
-            logo: { "@type": "ImageObject", url: site.logo }
-          });
-
-          graph.push({
-            "@type": "WebSite",
-            "@id": `${site.domain}/#website`,
-            name: site.name,
-            url: site.domain,
-            publisher: { "@id": `${site.domain}/#organization` }
-          });
-
-          if (breadcrumbs.length > 1) {
-            graph.push({
-              "@type": "BreadcrumbList",
-              "@id": `${canonical}#breadcrumbs`,
-              itemListElement: breadcrumbs.map((item, index) => ({
-                "@type": "ListItem",
-                position: index + 1,
-                name: item.name,
-                item: item.url
-              }))
-            });
-          }
-
-          if (pageType === "calculator") {
-            graph.push({
-              "@type": "SoftwareApplication",
-              "@id": `${canonical}#calculator`,
-              name: title,
-              applicationCategory: "FinanceApplication",
-              operatingSystem: "Web",
-              url: canonical,
-              description
-            });
-          } else if (pageType !== "home") {
-            graph.push({
-              "@type": "Article",
-              "@id": `${canonical}#article`,
-              headline: title,
-              description,
-              publisher: { "@id": `${site.domain}/#organization` },
-              mainEntityOfPage: canonical
-            });
-          }
-
-          if (faqs.length) {
-            graph.push({
-              "@type": "FAQPage",
-              "@id": `${canonical}#faq`,
-              mainEntity: faqs.map((item) => ({
-                "@type": "Question",
-                name: item.q,
-                acceptedAnswer: { "@type": "Answer", text: item.a }
-              }))
-            });
-          }
-
-          const script = document.createElement("script");
-          script.type = "application/ld+json";
-          script.textContent = JSON.stringify({ "@context": "https://schema.org", "@graph": graph });
-          document.head.appendChild(script);
-        }
-
         function wireContactForm() {
           const form = document.querySelector("[data-contact-form]");
           if (!form) return;
@@ -3011,7 +3298,6 @@ def main_js() -> str:
         wireCookieBanner();
         drawCharts();
         wireCalculators();
-        injectSchema();
         wireContactForm();
         """
     )
@@ -3095,6 +3381,8 @@ def robots_txt() -> str:
         f"""
         User-agent: *
         Allow: /
+        Disallow: /*?q=*
+        Disallow: /*?s=*
 
         Sitemap: {DOMAIN}/sitemap.xml
         """
@@ -3105,7 +3393,7 @@ def sitemap_xml(paths: List[str]) -> str:
     items = []
     for path in paths:
         items.append(
-            f"<url><loc>{html.escape(url_for(path))}</loc><changefreq>weekly</changefreq><priority>{'1.0' if path == 'index.html' else '0.8'}</priority></url>"
+            f"<url><loc>{html.escape(url_for(path))}</loc><lastmod>{SITEMAP_LASTMOD}</lastmod><changefreq>weekly</changefreq><priority>{'1.0' if path == 'index.html' else '0.8'}</priority></url>"
         )
     return trim(
         f"""
@@ -3113,6 +3401,31 @@ def sitemap_xml(paths: List[str]) -> str:
         <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
           {''.join(items)}
         </urlset>
+        """
+    )
+
+
+def redirects_txt(paths: List[str]) -> str:
+    # Per project rules: NEVER 200 rules; never www rules in this file
+    # (www and http→https handled in Cloudflare dashboard).
+    # Only canonicalize legacy .html routes to clean URLs.
+    lines = ["/index.html / 301!", "/index / 301!"]
+    for path in paths:
+        if path == "index.html" or path == "404.html":
+            continue
+        lines.append(f"/{path} /{path.removesuffix('.html')} 301!")
+    return "\n".join(lines) + "\n"
+
+
+def headers_txt() -> str:
+    return trim(
+        """
+        /*
+          X-Frame-Options: DENY
+          X-Content-Type-Options: nosniff
+          Referrer-Policy: strict-origin-when-cross-origin
+          Permissions-Policy: geolocation=(), microphone=(), camera=()
+          Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
         """
     )
 
@@ -3405,6 +3718,12 @@ def build() -> None:
             body, faqs = simple_page_body(title, desc, generic_related)
             body += contact_email_html()
             body += contact_form_html()
+        elif path == "about.html":
+            generic_related = [p for p in related_pool if p != path][:6]
+            body, faqs = about_body(generic_related)
+        elif path == "how-we-research.html":
+            generic_related = [p for p in related_pool if p != path][:6]
+            body, faqs = how_we_research_body(generic_related)
         else:
             generic_related = [p for p in related_pool if p != path][:6]
             body, faqs = simple_page_body(title, desc, generic_related, legal=page_type == "legal")
@@ -3450,6 +3769,7 @@ def build() -> None:
             faqs=[],
             hero_title="Page not found",
             hero_summary="Use the navigation below to return to credit, loan, mortgage, and debt payoff resources.",
+            is_404=True,
         ),
     )
 
@@ -3457,6 +3777,8 @@ def build() -> None:
     write(TARGET / "main.js", main_js())
     write(TARGET / "robots.txt", robots_txt())
     write(TARGET / "sitemap.xml", sitemap_xml(all_paths))
+    write(TARGET / "_redirects", redirects_txt(all_paths))
+    write(TARGET / "_headers", headers_txt())
     write(TARGET / "assets" / "icons" / "logo.svg", logo_svg())
     write(TARGET / "assets" / "icons" / "favicon.svg", favicon_svg())
     write(TARGET / "assets" / "images" / "social-preview.svg", social_svg())

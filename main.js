@@ -61,11 +61,11 @@ function wireCookieBanner() {
   const banner = document.querySelector(".ccg-cookie-banner");
   if (!banner) return;
   const choice = localStorage.getItem("ccg-cookie-choice");
-  if (!choice) banner.hidden = false;
+  if (!choice) banner.style.display = "flex";
   banner.querySelectorAll("[data-cookie-action]").forEach((button) => {
     button.addEventListener("click", () => {
       localStorage.setItem("ccg-cookie-choice", button.dataset.cookieAction);
-      banner.hidden = true;
+      banner.style.display = "none";
     });
   });
 }
@@ -215,93 +215,6 @@ function wireCalculators() {
   });
 }
 
-function injectSchema() {
-  const body = document.body;
-  const breadcrumbs = parseJSON(body.dataset.breadcrumbs, []);
-  const faqs = parseJSON(body.dataset.faqs, []);
-  const canonical = document.querySelector('link[rel="canonical"]')?.href || location.href;
-  const description = document.querySelector('meta[name="description"]')?.content || "";
-  const title = document.title;
-  const pageType = body.dataset.pageType || "article";
-  const graph = [];
-
-  graph.push({
-    "@type": pageType === "home" ? "WebSite" : "WebPage",
-    "@id": `${canonical}#page`,
-    name: title,
-    url: canonical,
-    description,
-    isPartOf: { "@id": `${site.domain}/#website` }
-  });
-
-  graph.push({
-    "@type": "Organization",
-    "@id": `${site.domain}/#organization`,
-    name: site.name,
-    url: site.domain,
-    logo: { "@type": "ImageObject", url: site.logo }
-  });
-
-  graph.push({
-    "@type": "WebSite",
-    "@id": `${site.domain}/#website`,
-    name: site.name,
-    url: site.domain,
-    publisher: { "@id": `${site.domain}/#organization` }
-  });
-
-  if (breadcrumbs.length > 1) {
-    graph.push({
-      "@type": "BreadcrumbList",
-      "@id": `${canonical}#breadcrumbs`,
-      itemListElement: breadcrumbs.map((item, index) => ({
-        "@type": "ListItem",
-        position: index + 1,
-        name: item.name,
-        item: item.url
-      }))
-    });
-  }
-
-  if (pageType === "calculator") {
-    graph.push({
-      "@type": "SoftwareApplication",
-      "@id": `${canonical}#calculator`,
-      name: title,
-      applicationCategory: "FinanceApplication",
-      operatingSystem: "Web",
-      url: canonical,
-      description
-    });
-  } else if (pageType !== "home") {
-    graph.push({
-      "@type": "Article",
-      "@id": `${canonical}#article`,
-      headline: title,
-      description,
-      publisher: { "@id": `${site.domain}/#organization` },
-      mainEntityOfPage: canonical
-    });
-  }
-
-  if (faqs.length) {
-    graph.push({
-      "@type": "FAQPage",
-      "@id": `${canonical}#faq`,
-      mainEntity: faqs.map((item) => ({
-        "@type": "Question",
-        name: item.q,
-        acceptedAnswer: { "@type": "Answer", text: item.a }
-      }))
-    });
-  }
-
-  const script = document.createElement("script");
-  script.type = "application/ld+json";
-  script.textContent = JSON.stringify({ "@context": "https://schema.org", "@graph": graph });
-  document.head.appendChild(script);
-}
-
 function wireContactForm() {
   const form = document.querySelector("[data-contact-form]");
   if (!form) return;
@@ -318,5 +231,4 @@ wireMenu();
 wireCookieBanner();
 drawCharts();
 wireCalculators();
-injectSchema();
 wireContactForm();

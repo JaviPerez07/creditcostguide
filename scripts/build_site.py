@@ -74,6 +74,10 @@ INDEXABLE_PAGES: set[str] = {
     "pages/mortgage-calculator.html",
     "pages/debt-payoff-calculator.html",
     "pages/credit-utilization-calculator.html",
+    # New Chart.js calculators (Phase 2 — May 2026 launch).
+    "pages/debt-avalanche-vs-snowball-calculator.html",
+    "pages/credit-card-minimum-payment-true-cost-calculator.html",
+    "pages/mortgage-refinance-break-even-calculator.html",
 }
 
 
@@ -233,7 +237,19 @@ CALCULATORS = [
     ("pages/mortgage-calculator.html", "Mortgage Calculator: Principal, Interest, Taxes, Insurance, and PMI", "Estimate housing payments with mortgage principal, rate, term, taxes, insurance, and down payment assumptions.", "mortgage"),
     ("pages/debt-payoff-calculator.html", "Debt Payoff Calculator: Compare Repayment Speed and Interest Saved", "Compare minimum-payment debt payoff against a faster monthly budget to see time and interest differences.", "debt"),
     ("pages/credit-utilization-calculator.html", "Credit Utilization Calculator: Measure Balance-to-Limit Ratios", "Check utilization by card and overall to see how revolving balances may affect credit health.", "utilization"),
+    # Charted calculators (Chart.js, per-page JS) — see calc_js_*() and html_doc(extra_scripts=...).
+    ("pages/debt-avalanche-vs-snowball-calculator.html", "Debt Avalanche vs Snowball Calculator: Compare Payoff Methods", "Compare avalanche and snowball debt payoff strategies side by side using up to five debts and a single monthly payoff budget.", "avalanche-snowball"),
+    ("pages/credit-card-minimum-payment-true-cost-calculator.html", "Minimum Payment Calculator: The True Cost of Paying the Minimum", "Estimate credit card payoff time and total interest when paying only the minimum, then see how an extra monthly payment changes the picture.", "min-payment"),
+    ("pages/mortgage-refinance-break-even-calculator.html", "Mortgage Refinance Break-Even Calculator: Compare Old and New Payments", "Estimate refinance break-even months by comparing your current mortgage payment to a new offer with closing costs included.", "refinance"),
 ]
+
+# Calculators that require Chart.js + a dedicated per-page JS file written to
+# /assets/scripts/. Used by html_doc() to inject the right script tags.
+CHARTED_CALCS: Dict[str, str] = {
+    "avalanche-snowball": "debt-avalanche-snowball.js",
+    "min-payment": "minimum-payment-true-cost.js",
+    "refinance": "refinance-break-even.js",
+}
 
 
 ROOT_PAGES = [
@@ -920,6 +936,7 @@ PAGE_CONTENT: Dict[str, dict] = {
             "worse: a $5,000 balance at 20% APR paying the standard minimum takes approximately "
             "17 years to retire and costs over $4,300 in interest — more than 85 cents in interest "
             "for every dollar originally borrowed.</p>"
+            "<p>Use the <a href=\"/pages/debt-avalanche-vs-snowball-calculator\">avalanche vs snowball calculator</a> to compare both methods on your specific balances and APRs.</p>"
             "<p>The problem is almost never a lack of desire to eliminate debt. It's choosing "
             "the wrong strategy, applying extra payments to the wrong accounts, or "
             "abandoning a plan when motivation drops. This guide covers the two primary "
@@ -1532,7 +1549,7 @@ PAGE_CONTENT: Dict[str, dict] = {
     "pages/personal-loans-guide.html": {
         "intro_h2": "What a personal loan really costs once fees are in the picture",
         "intro_body": (
-            "<p>Most personal loan shoppers compare a single number — the advertised APR — and stop there. That's the most expensive mistake in the category. The APR moves with credit profile, debt-to-income ratio, and lender risk appetite, and two lenders offering the same APR can quote very different total costs once an origination fee, prepayment rule, or term length difference enters the math. The <a href=\"https://www.consumerfinance.gov/ask-cfpb/what-is-a-personal-loan-en-2122/\" target=\"_blank\" rel=\"noopener noreferrer\">CFPB&rsquo;s consumer explainer</a> covers the mechanics in plain English.</p>"
+            "<p>Most personal loan shoppers compare a single number — the advertised APR — and stop there. That's the most expensive mistake in the category. The APR moves with credit profile, debt-to-income ratio, and lender risk appetite, and two lenders offering the same APR can quote very different total costs once an origination fee, prepayment rule, or term length difference enters the math. The <a href=\"https://www.consumerfinance.gov/consumer-tools/\" target=\"_blank\" rel=\"noopener noreferrer\">CFPB&rsquo;s consumer explainer</a> covers the mechanics in plain English.</p>"
             "<p>This guide walks through how to read a personal loan offer the way an underwriter reads it. The goal is to put the borrower in a position where the monthly payment shown in the offer is one of five numbers being compared, not the only one.</p>"
         ),
         "sections": [
@@ -1583,7 +1600,7 @@ PAGE_CONTENT: Dict[str, dict] = {
         "intro_h2": "Credit cards: where the real cost lives, and how to keep it low",
         "intro_body": (
             "<p>Credit cards are the most flexible borrowing product in U.S. consumer finance and the most expensive when used carelessly. The <a href=\"https://www.federalreserve.gov/releases/g19/current/\" target=\"_blank\" rel=\"noopener noreferrer\">Federal Reserve&rsquo;s G.19 release</a> tracks the average rate on accounts assessed interest; that number is the single most useful benchmark for whether you are paying more than the typical revolving borrower.</p>"
-            "<p>This guide is not a list of &ldquo;best cards&rdquo;. It is a walkthrough of the mechanics that decide how much a credit card costs the person who carries one: the grace period, the way interest accrues, the role of utilization, and the fees that hide in fine print.</p>"
+            "<p>This guide is not a list of &ldquo;best cards&rdquo;. It is a walkthrough of the mechanics that decide how much a credit card costs the person who carries one: the grace period, the way interest accrues, the role of utilization, and the fees that hide in fine print. If you are already carrying a balance and want to see the cost of paying only the minimum, jump to the <a href=\"/pages/credit-card-minimum-payment-true-cost-calculator\">minimum payment true cost calculator</a>.</p>"
         ),
         "sections": [
             {
@@ -1607,7 +1624,7 @@ PAGE_CONTENT: Dict[str, dict] = {
                 "h2": "Credit utilization and what credit-scoring models really do with it",
                 "body": (
                     "<p>Utilization is the ratio of reported balances to credit limits. It is the second-largest factor in most credit scoring models (after payment history). Two practical points worth knowing: (1) issuers usually report the <em>statement</em> balance to the bureaus, not the current balance, so paying down before the statement closes is the most effective lever; (2) per-card utilization matters in addition to aggregate, so one maxed-out card can hurt the score even if the total ratio is moderate.</p>"
-                    "<p>The CFPB&rsquo;s page on <a href=\"https://www.consumerfinance.gov/ask-cfpb/what-is-a-credit-utilization-rate-en-2096/\" target=\"_blank\" rel=\"noopener noreferrer\">credit utilization rate</a> is a useful plain-language reference.</p>"
+                    "<p>The CFPB&rsquo;s page on <a href=\"https://www.myfico.com/credit-education/credit-scores/amount-of-debt\" target=\"_blank\" rel=\"noopener noreferrer\">credit utilization rate</a> is a useful plain-language reference.</p>"
                 )
             },
             {
@@ -1616,7 +1633,7 @@ PAGE_CONTENT: Dict[str, dict] = {
                 "body": (
                     "<p>Annual fee: only worth paying if the year&rsquo;s expected rewards or benefits exceed the fee in real cash equivalent, not in inflated &ldquo;value&rdquo; estimates.</p>"
                     "<p>Balance transfer fee: typically 3&ndash;5% of the amount moved, paid up front. A 0% promo APR only saves money if the interest avoided exceeds the transfer fee over the promo period. Calculate the break-even before transferring.</p>"
-                    "<p>Late fee: capped by federal rule (the cap is updated by the CFPB periodically — see their <a href=\"https://www.consumerfinance.gov/credit-cards/\" target=\"_blank\" rel=\"noopener noreferrer\">credit card resources</a>). The bigger cost of paying late is usually not the fee itself but the loss of the grace period and the potential APR repricing.</p>"
+                    "<p>Late fee: capped by federal rule (the cap is updated by the CFPB periodically — see their <a href=\"https://www.consumerfinance.gov/consumer-tools/credit-cards/\" target=\"_blank\" rel=\"noopener noreferrer\">credit card resources</a>). The bigger cost of paying late is usually not the fee itself but the loss of the grace period and the potential APR repricing.</p>"
                 )
             },
         ],
@@ -1635,7 +1652,7 @@ PAGE_CONTENT: Dict[str, dict] = {
         "intro_h2": "A mortgage costs more than the monthly payment shown on the marketing page",
         "intro_body": (
             "<p>A mortgage&rsquo;s sticker rate is what most shoppers compare. The actual all-in monthly cost is the sticker rate plus property taxes, homeowners insurance, mortgage insurance when applicable, and HOA dues when applicable — together called <strong>PITI(A)</strong>. The CFPB&rsquo;s <a href=\"https://www.consumerfinance.gov/owning-a-home/loan-estimate/\" target=\"_blank\" rel=\"noopener noreferrer\">Loan Estimate</a> is the federally standardized document that puts all of this on one page; every lender must deliver it within three business days of application.</p>"
-            "<p>This guide explains how to read a Loan Estimate, how to compare two of them, and where money quietly leaks during the process.</p>"
+            "<p>This guide explains how to read a Loan Estimate, how to compare two of them, and where money quietly leaks during the process. If you already have a mortgage and want to test whether refinancing makes sense, jump to the <a href=\"/pages/mortgage-refinance-break-even-calculator\">refinance break-even calculator</a> for the math.</p>"
         ),
         "sections": [
             {
@@ -1665,7 +1682,7 @@ PAGE_CONTENT: Dict[str, dict] = {
                 "h2": "Where closing-day cash actually goes",
                 "body": (
                     "<p>Closing costs typically total 2&ndash;5% of the loan amount and are split into three buckets on the Loan Estimate: (A) services you can shop for (title, settlement, pest), (B) services you can&rsquo;t shop for (appraisal, credit report, lender-required), and (C) taxes and prepaid items (transfer taxes, prepaid interest, escrow deposits). Bucket A is where price comparison pays off. Bucket C is usually unavoidable but should still be verified for accuracy.</p>"
-                    "<p>Pair this with <a href=\"/pages/mortgage-closing-costs-guide\">our closing costs explainer</a> for line-by-line detail.</p>"
+                    "<p>For the line-by-line math comparing two specific offers, open the <a href=\"/pages/mortgage-refinance-break-even-calculator\">refinance break-even calculator</a> and enter the figures from each Loan Estimate side by side.</p>"
                 )
             },
         ],
@@ -1683,7 +1700,7 @@ PAGE_CONTENT: Dict[str, dict] = {
     "pages/banking-fees-guide.html": {
         "intro_h2": "The bank fees Americans pay most, and the ones easiest to avoid",
         "intro_body": (
-            "<p>U.S. consumer bank fees fall into a small number of categories — overdraft, monthly maintenance, ATM, wire, paper statement, and minimum-balance penalties — and most are avoidable with a deliberate account choice. The <a href=\"https://www.consumerfinance.gov/about-us/blog/check-out-our-new-resources-help-people-avoid-overdraft-fees-and-build-savings/\" target=\"_blank\" rel=\"noopener noreferrer\">CFPB&rsquo;s overdraft resources</a> and the <a href=\"https://www.fdic.gov/resources/bankers/national-rates/\" target=\"_blank\" rel=\"noopener noreferrer\">FDIC National Rates</a> data are the right starting points for figuring out which fees you are actually paying.</p>"
+            "<p>U.S. consumer bank fees fall into a small number of categories — overdraft, monthly maintenance, ATM, wire, paper statement, and minimum-balance penalties — and most are avoidable with a deliberate account choice. The <a href=\"https://www.consumerfinance.gov/about-us/blog/\" target=\"_blank\" rel=\"noopener noreferrer\">CFPB&rsquo;s overdraft resources</a> and the <a href=\"https://www.fdic.gov/national-rates-and-rate-caps\" target=\"_blank\" rel=\"noopener noreferrer\">FDIC National Rates</a> data are the right starting points for figuring out which fees you are actually paying.</p>"
             "<p>This guide describes how each fee works, when it is reasonable, and the account-level changes that remove it.</p>"
         ),
         "sections": [
@@ -1733,7 +1750,7 @@ PAGE_CONTENT: Dict[str, dict] = {
     "pages/refinancing-guide.html": {
         "intro_h2": "Refinancing: the math that actually decides whether to do it",
         "intro_body": (
-            "<p>Refinancing replaces an existing loan with a new one that has different terms. Done well, it lowers total cost; done poorly, it resets a clock and adds fees for negligible improvement. The CFPB&rsquo;s <a href=\"https://www.consumerfinance.gov/owning-a-home/process/refinance/\" target=\"_blank\" rel=\"noopener noreferrer\">refinance overview</a> is the clearest starting point for mortgages; the same principles apply, with smaller fee scales, to auto loans, personal loans, and student loans.</p>"
+            "<p>Refinancing replaces an existing loan with a new one that has different terms. Done well, it lowers total cost; done poorly, it resets a clock and adds fees for negligible improvement. The CFPB&rsquo;s <a href=\"https://www.consumerfinance.gov/owning-a-home/\" target=\"_blank\" rel=\"noopener noreferrer\">refinance overview</a> is the clearest starting point for mortgages; the same principles apply, with smaller fee scales, to auto loans, personal loans, and student loans.</p>"
             "<p>This guide focuses on the decision math: when refinancing saves money, when it does not, and how to compare a new loan against the one you already have.</p>"
         ),
         "sections": [
@@ -1971,7 +1988,7 @@ PAGE_CONTENT: Dict[str, dict] = {
                 "kicker": "Two methods",
                 "h2": "Avalanche vs. snowball",
                 "body": (
-                    "<p>This tool simulates a single balance. When you have multiple debts, two well-known strategies exist: <em>avalanche</em> (pay highest APR first, mathematically optimal) and <em>snowball</em> (pay smallest balance first, behaviorally easier for some). The CFPB does not endorse either; both work if followed. See <a href=\"/pages/debt-snowball-vs-avalanche\">our snowball vs. avalanche article</a> for the comparison.</p>"
+                    "<p>This tool simulates a single balance. When you have multiple debts, two well-known strategies exist: <em>avalanche</em> (pay highest APR first, mathematically optimal) and <em>snowball</em> (pay smallest balance first, behaviorally easier for some). The CFPB does not endorse either; both work if followed. Run the math on your specific balances with the <a href=\"/pages/debt-avalanche-vs-snowball-calculator\">avalanche vs snowball calculator</a>.</p>"
                 )
             },
         ],
@@ -1982,6 +1999,190 @@ PAGE_CONTENT: Dict[str, dict] = {
              "The single-balance simulator assumes no new charges. If you are still actively charging on the same card, the &ldquo;new monthly charges&rdquo; field on the credit card interest calculator gives a more realistic picture."],
             ["What APR should I use if I do not know mine?",
              "Check your most recent statement; the APR is disclosed in plain language. For multiple cards, use the weighted average by balance for a single-balance estimate or run each card separately."],
+        ],
+    },
+
+    # ------------------------------------------------------------------
+    "pages/debt-avalanche-vs-snowball-calculator.html": {
+        "intro_h2": "Avalanche vs. snowball: which one actually saves more?",
+        "sources_topic": "debt-payoff",
+        "intro_body": (
+            "<p>The two named approaches to multi-debt payoff are the <strong>avalanche</strong> (extra dollars to the highest-APR balance first) and the <strong>snowball</strong> (extra dollars to the smallest balance first). The CFPB does not endorse either method &mdash; both work if the borrower stays the course. The right one for you depends on the math of your specific debts and on what keeps you paying consistently month after month.</p>"
+            "<p>This calculator runs both simulations on your real balances and APRs at the same monthly payoff budget, then shows months to debt-free, total interest paid, balance curves over time, and a verdict that tells you exactly how much each method costs or saves versus the other. No login, no tracking, no localStorage &mdash; the math runs entirely in your browser.</p>"
+        ),
+        "sections": [
+            {
+                "kicker": "How avalanche works",
+                "h2": "Highest APR first &mdash; the mathematical winner most of the time",
+                "body": (
+                    "<p>The avalanche method directs all extra payment dollars to the debt with the highest APR until that balance reaches zero, then rolls the entire freed-up payment down to the next highest APR. Minimum-interest discipline kicks in immediately because the most expensive dollar of debt is the one being attacked first.</p>"
+                    "<p>For most borrowers with mixed credit-card and installment debt, avalanche minimizes total interest paid &mdash; sometimes by hundreds, sometimes by thousands of dollars compared with snowball, depending on the spread between the highest and lowest APR. The trade-off: if the highest-APR debt also happens to be the biggest balance, it can take many months before the borrower sees any account fully retired. Visible progress is slower.</p>"
+                )
+            },
+            {
+                "kicker": "How snowball works",
+                "h2": "Smallest balance first &mdash; the behavioral winner for some",
+                "body": (
+                    "<p>The snowball method directs extra dollars to the debt with the smallest balance first, regardless of APR. The first account is typically retired within a few months, which creates a visible win, builds momentum, and freed-up minimum payments roll into the next account.</p>"
+                    "<p>The research on snowball vs. avalanche is mixed. A frequently cited Harvard Business Review study found that consumers were more likely to complete debt payoff when they focused on closing smaller balances first. If past attempts at debt payoff have stalled out, snowball can be the right answer even when avalanche would technically cost less in interest. The calculator quantifies the trade-off so you can decide.</p>"
+                )
+            },
+            {
+                "kicker": "Inside the simulation",
+                "h2": "What the model does each simulated month",
+                "body": (
+                    "<p>Each month the calculator: (1) adds monthly interest = balance &times; (APR &divide; 12) to every account that still has a balance, (2) sorts active accounts by avalanche or snowball priority, (3) applies the full monthly payoff budget starting from the top of the priority list and cascading down once a balance hits zero, (4) records the new total balance for the chart, (5) repeats until every balance is zero or 600 months pass.</p>"
+                    "<p>If the monthly budget cannot cover total monthly interest across all active debts, the calculator triggers a warning &mdash; this is the &ldquo;negative amortization&rdquo; case where the balance grows even with payments applied. The fix is almost always a higher monthly budget; if that isn&rsquo;t possible, the next step is usually a hardship plan from the lender or a CFPB-listed nonprofit credit counselor.</p>"
+                )
+            },
+            {
+                "kicker": "Worked example",
+                "h2": "Three real-looking debts and a $600 monthly budget",
+                "body": (
+                    "<p>The default inputs in the calculator load three illustrative debts: a $4,200 credit card at 24.99% APR, an $8,000 personal loan at 12.5%, and a $1,200 store card at 28.99%. At a $600 monthly payoff budget, avalanche attacks the 28.99% store card first, then the 24.99% credit card, then the personal loan. Snowball attacks the $1,200 store card first (smallest balance), then the $4,200 credit card, then the personal loan.</p>"
+                    "<p>In this specific scenario both methods reach the same first target because the smallest-balance debt also happens to carry the highest APR. The order diverges on debts two and three: avalanche pays the 24.99% credit card next, snowball pays the $4,200 credit card next. Change one input &mdash; for example, raise the personal-loan APR above the credit-card APR &mdash; and the verdict changes immediately. Try it.</p>"
+                )
+            },
+            {
+                "kicker": "Method choice",
+                "h2": "When the two methods produce nearly the same result",
+                "body": (
+                    "<p>If your highest-APR debt is also the smallest balance, avalanche and snowball converge. If your highest-APR debt is much larger than the others, avalanche saves materially more. If all your APRs are similar (e.g., a portfolio of three credit cards all between 22% and 26%), the two methods produce nearly identical interest costs and the &ldquo;right&rdquo; one is whichever you will actually stick with.</p>"
+                    "<p>For most borrowers we recommend running both simulations once a year and re-checking after a big change &mdash; a balance transfer, a personal loan to consolidate, a missed payment that bumped an APR to a penalty rate. The right method is rarely a permanent decision; it&rsquo;s a recurring one.</p>"
+                )
+            },
+        ],
+        "faqs": [
+            ["Which method usually saves more interest?",
+             "Avalanche, because it pays the highest-APR balance first. The size of the savings depends on the APR spread between your debts and how long you carry the highest-rate balance."],
+            ["Why would I ever choose snowball?",
+             "Snowball gives visible wins faster. Behavioral research has shown that some borrowers finish payoff plans more reliably when they see balances retired quickly, even when avalanche would cost less in interest."],
+            ["Does this calculator include minimum payments?",
+             "No. It assumes a single monthly payoff budget that you allocate across your debts. If your lender requires specific minimum payments on each account, treat this calculator as a planning aid and confirm the math against your statements."],
+            ["What if my payoff budget is too low?",
+             "If your budget cannot cover monthly interest on all active balances, the calculator warns you that negative amortization may occur. The realistic options are increasing the budget, negotiating with the lender, or contacting a nonprofit credit counselor listed by the CFPB."],
+            ["Can I include both loans and credit cards?",
+             "Yes. The model treats every entered debt with a simple monthly-APR interest calculation. Real credit-card billing uses average-daily-balance accounting, and some installment loans amortize differently, so results are planning estimates, not exact lender reconciliations."],
+            ["Is this financial advice?",
+             NON_ADVICE_DISCLAIMER],
+        ],
+    },
+
+    # ------------------------------------------------------------------
+    "pages/credit-card-minimum-payment-true-cost-calculator.html": {
+        "intro_h2": "What paying only the minimum actually costs",
+        "sources_topic": "credit-cards",
+        "intro_body": (
+            "<p>Minimum payments are designed to be affordable, not to retire a balance. They are typically calculated as the greater of a small percentage of the balance (often 1&ndash;3%) or a flat dollar floor (often $25&ndash;$35). On a high-APR balance, the early minimum payment can barely beat the monthly interest, which is why a credit-card balance can survive for a decade even when payments never miss.</p>"
+            "<p>This calculator simulates payoff month by month under two scenarios &mdash; minimum only, and minimum plus an extra payment you choose with a slider &mdash; and reports payoff time, total interest paid, the interest-to-principal ratio, and how much you save by adding the extra payment. Move the slider; the numbers update instantly.</p>"
+        ),
+        "sections": [
+            {
+                "kicker": "Why minimums stretch payoff",
+                "h2": "The arithmetic that keeps balances alive",
+                "body": (
+                    "<p>A 24.99% APR is about 2.08% per month. On a $5,000 balance, the first month&rsquo;s interest is roughly $104. If the minimum payment is 2% of the balance ($100) or a $25 floor &mdash; whichever is larger &mdash; then the borrower pays $100, of which $104 was interest. Principal actually grew that month. The next month, the borrower pays 2% of a slightly larger balance and so on, in a slow grind that can run more than 25 years on a $5,000 starting balance.</p>"
+                    "<p>The CARD Act of 2009 required issuers to include a Minimum Payment Warning Box on every statement, showing the years and total interest implied by paying only the minimum. Look for it on your statement &mdash; the numbers tend to be eye-opening.</p>"
+                )
+            },
+            {
+                "kicker": "How issuers calculate minimums",
+                "h2": "Three common formulas",
+                "body": (
+                    "<p><strong>Percentage of balance:</strong> typically 1&ndash;3% of the statement balance. Common for general-purpose credit cards.</p>"
+                    "<p><strong>Percentage plus interest:</strong> 1% of balance plus any interest and fees from the current cycle. This is the Regulation Z &ldquo;safe harbor&rdquo; formula and is required for some subprime cards. It pays interest faster than a flat percentage formula but leaves principal moving slowly.</p>"
+                    "<p><strong>Flat dollar floor:</strong> a minimum dollar amount (e.g., $25, $35, or $40) regardless of balance, as long as the balance is above that floor. When a flat floor kicks in on a small balance, the implied payoff timeline shortens dramatically.</p>"
+                    "<p>The calculator lets you set both the percentage and the floor so you can model your specific cardholder agreement.</p>"
+                )
+            },
+            {
+                "kicker": "Extra payment impact",
+                "h2": "Why a small extra payment moves the needle so much",
+                "body": (
+                    "<p>Adding $50 or $100 a month to the minimum is rarely transformative for a single month&rsquo;s cash flow, but the compound effect over many months is large. Every extra dollar paid early reduces the principal that all future months&rsquo; interest accrues on. The calculator shows this directly: with a $5,000 balance at 24.99% APR, moving from minimum-only to a minimum plus $50 typically cuts payoff time roughly in half and saves several thousand dollars in interest.</p>"
+                    "<p>The slider lets you find the lowest extra-payment amount that still produces a tolerable payoff timeline. For most borrowers, the right answer is whatever amount keeps the monthly budget sustainable but pays the balance off in under 24 months.</p>"
+                )
+            },
+            {
+                "kicker": "Limits of the model",
+                "h2": "What this calculator does not include",
+                "body": (
+                    "<p>It does not model: new purchases during payoff (which reset the grace period and add to the balance immediately), promotional APRs that revert, late fees, penalty APRs triggered by a missed payment, deferred-interest store-card structures (where if you don&rsquo;t pay the full balance by the promo end date, all accrued interest is charged retroactively), balance-transfer fees, or hardship-plan repricing.</p>"
+                    "<p>Each of those can move the actual cost significantly. Treat the result as a planning floor: your real-world cost is at least this much and probably more if any of the above apply.</p>"
+                )
+            },
+        ],
+        "faqs": [
+            ["Why do minimum payments take so long?",
+             "Because the minimum payment is calculated as a small percentage of the balance and the high APR consumes most of each payment as interest in the early months. Principal moves slowly."],
+            ["Does this calculator include new purchases?",
+             "No. It assumes the starting balance is closed to new charges. If you continue to use the card, payoff takes longer."],
+            ["What minimum-payment percentage should I use?",
+             "Use the percentage from your cardholder agreement if you know it. Otherwise, 2% to 3% is a common planning range. The floor (e.g., $25 minimum) often dominates when balances are small."],
+            ["Can a small extra payment really save thousands?",
+             "On high-APR balances, yes. Extra payments reduce principal earlier in the schedule, which reduces every future month&rsquo;s interest charge. Compounding works in both directions."],
+            ["What if the calculator says my balance never pays off?",
+             "That means the minimum payment is not exceeding monthly interest under your inputs. Increase the payment, raise the floor, or contact your lender or a nonprofit credit counselor."],
+            ["Is this financial advice?",
+             NON_ADVICE_DISCLAIMER],
+        ],
+    },
+
+    # ------------------------------------------------------------------
+    "pages/mortgage-refinance-break-even-calculator.html": {
+        "intro_h2": "Should you refinance? The break-even math, in one screen.",
+        "sources_topic": "refinancing",
+        "intro_body": (
+            "<p>A mortgage refinance lowers (or raises) your monthly payment in exchange for closing costs paid up front. The decision turns on a single arithmetic question: <strong>how many months of payment savings does it take to recover those closing costs?</strong> If you plan to keep the loan longer than that break-even, refinancing usually saves money. If you might sell, move, or refinance again before then, it usually doesn&rsquo;t.</p>"
+            "<p>This calculator compares your current loan with a new offer, shows the monthly payment difference, divides closing costs by monthly savings, and warns you if your planned sale or next refinance comes before the break-even point. The chart visualizes cumulative savings net of closing costs over time.</p>"
+        ),
+        "sections": [
+            {
+                "kicker": "The break-even formula",
+                "h2": "Closing costs &divide; monthly savings = break-even months",
+                "body": (
+                    "<p>The standard break-even calculation is straightforward: total refinance closing costs divided by the monthly principal-and-interest savings between the old and new loans. If your new loan saves $250 a month and the refinance costs $6,500 to close, the simple break-even is 26 months. After month 26 every additional payment saved is a net gain.</p>"
+                    "<p>This calculator uses that simple model on purpose. Some online calculators add tax-deduction adjustments, opportunity-cost discount rates, or amortization-aware accounting for the larger principal balance early in the new loan. Those refinements matter at the margin, but they don&rsquo;t change the basic question of whether your timeline beats the simple break-even.</p>"
+                )
+            },
+            {
+                "kicker": "Read your Loan Estimate first",
+                "h2": "The federal Loan Estimate is the right closing-costs number",
+                "body": (
+                    "<p>Federal Truth-in-Lending rules require every lender to deliver a Loan Estimate within three business days of an application. The CFPB&rsquo;s page on the <a href=\"https://www.consumerfinance.gov/owning-a-home/loan-estimate/\" target=\"_blank\" rel=\"noopener noreferrer\">Loan Estimate</a> shows the exact form. Pull closing-cost totals from there &mdash; not from advertised &ldquo;average&rdquo; numbers &mdash; for the most accurate break-even calculation.</p>"
+                    "<p>Closing costs typically run 2&ndash;5% of the new loan amount. They include lender origination, appraisal, title and settlement, recording, prepaid interest, and the funding of the new escrow account. Some of these are negotiable (or shoppable), and some are not. The Loan Estimate splits them into three buckets so you can see which is which.</p>"
+                )
+            },
+            {
+                "kicker": "Term-reset risk",
+                "h2": "Why a lower payment can still cost more total",
+                "body": (
+                    "<p>The most common silent mistake in refinancing is rolling 22 years remaining on a 30-year loan into a brand-new 30-year loan. The new monthly payment is lower &mdash; but the timeline extended by 8 years, and total interest paid often goes up even at a lower rate.</p>"
+                    "<p>If your goal is total-cost reduction, ask the lender to quote the refinance at a term that doesn&rsquo;t extend your existing schedule (e.g., a new 20-year loan to replace 22 years remaining on the original 30-year). The monthly payment may not drop as much, but the total interest savings can be much larger.</p>"
+                )
+            },
+            {
+                "kicker": "Planned-sale warning",
+                "h2": "If you might sell before break-even, refinance carefully",
+                "body": (
+                    "<p>The calculator asks for your planned timeline in years for a sale, payoff, or next refinance. If that number is shorter than the calculated break-even months, the calculator surfaces a warning. The economic interpretation is simple: you would pay the closing costs once and only partially recover them through monthly savings before the loan goes away.</p>"
+                    "<p>Job moves, marriage and divorce, deaths and births, and unforeseen relocations all shorten loan timelines. A conservative rule for borrowers who aren&rsquo;t certain of their five-year plan is to refinance only when the break-even comes inside 36 months &mdash; that leaves a buffer for life happening.</p>"
+                )
+            },
+        ],
+        "faqs": [
+            ["What is a refinance break-even point?",
+             "It is the number of months your monthly payment savings need to add up before they equal your refinance closing costs. After break-even, you are net ahead."],
+            ["Does this include taxes and insurance?",
+             "No. It estimates principal-and-interest payments only. Taxes, homeowners insurance, mortgage insurance, and HOA dues are unchanged by a typical refinance and are excluded from the break-even calculation."],
+            ["What if the new payment is higher?",
+             "Then there is no payment-based break-even. Some borrowers refinance to a higher payment intentionally (e.g., 30-year to 15-year) to cut total interest; this calculator focuses specifically on the payment-savings case."],
+            ["Should I include closing costs?",
+             "Yes. Closing costs drive the break-even calculation. Use the figure from your Loan Estimate for accuracy; advertised &ldquo;average&rdquo; numbers are not specific to your loan."],
+            ["What if I plan to sell soon?",
+             "If your planned timeline is shorter than the calculated break-even months, the calculator surfaces a warning. In that case, refinancing may not recover closing costs through monthly savings."],
+            ["Is this mortgage advice?",
+             NON_ADVICE_DISCLAIMER],
         ],
     },
 }
@@ -2080,13 +2281,13 @@ def generate_paragraph(topic: str, section: str, page_title: str, index: int) ->
 # sources are linked. Every link opens in a new tab with rel="noopener".
 SOURCES_BY_TOPIC: Dict[str, List[Tuple[str, str, str]]] = {
     "personal-loans": [
-        ("CFPB · Personal loans explained", "https://www.consumerfinance.gov/ask-cfpb/what-is-a-personal-loan-en-2122/", "Plain-language CFPB explainer on how personal loans work, what fees to expect, and consumer protections."),
+        ("CFPB · Personal loans explained", "https://www.consumerfinance.gov/consumer-tools/", "Plain-language CFPB explainer on how personal loans work, what fees to expect, and consumer protections."),
         ("Federal Reserve · G.19 Consumer Credit release", "https://www.federalreserve.gov/releases/g19/current/", "Official monthly consumer credit data used for APR and balance context."),
         ("FTC · Personal loan scams", "https://consumer.ftc.gov/articles/what-know-about-personal-loans", "Plain-English FTC guidance on what to watch for when shopping for a personal loan."),
     ],
     "credit-cards": [
         ("CFPB · Credit cards", "https://www.consumerfinance.gov/consumer-tools/credit-cards/", "CFPB resources on APR, fees, billing, and disputes."),
-        ("Federal Reserve · Report to Congress on the Profitability of Credit Card Operations", "https://www.federalreserve.gov/publications/report-to-the-congress-on-the-profitability-of-credit-card-operations-of-depository-institutions.htm", "Official Federal Reserve reporting on credit card pricing and profitability."),
+        ("Federal Reserve · Report to Congress on the Profitability of Credit Card Operations", "https://www.federalreserve.gov/publications/credit-card-profitability.htm", "Official Federal Reserve reporting on credit card pricing and profitability."),
         ("CFPB · Credit card complaint database", "https://www.consumerfinance.gov/data-research/consumer-complaints/", "Searchable public complaint database used to spot recurring issuer issues."),
     ],
     "mortgage": [
@@ -2097,21 +2298,21 @@ SOURCES_BY_TOPIC: Dict[str, List[Tuple[str, str, str]]] = {
     "credit-score": [
         ("CFPB · Credit reports and scores", "https://www.consumerfinance.gov/consumer-tools/credit-reports-and-scores/", "CFPB-curated resources on how scores are built, how to dispute errors, and how to get free reports."),
         ("FTC · Free credit reports", "https://consumer.ftc.gov/articles/free-credit-reports", "How to use AnnualCreditReport.com — the only federally authorized source for free reports."),
-        ("AnnualCreditReport.com", "https://www.annualcreditreport.com/", "Federally authorized source for free credit reports from Equifax, Experian, and TransUnion."),
+        ("AnnualCreditReport.com", "https://www.annualcreditreport.com/index.action", "Federally authorized source for free credit reports from Equifax, Experian, and TransUnion."),
     ],
     "banking-fees": [
-        ("FDIC · National rates and rate caps", "https://www.fdic.gov/resources/bankers/national-rates/", "Weekly FDIC national average rates for deposit products."),
-        ("CFPB · Bank account fees", "https://www.consumerfinance.gov/about-us/blog/check-out-our-new-resources-help-people-avoid-overdraft-fees-and-build-savings/", "CFPB consumer resources on overdraft, NSF, and account fees."),
-        ("Federal Reserve · Consumers and mobile financial services", "https://www.federalreserve.gov/publications/consumers-and-mobile-financial-services.htm", "Federal Reserve research on consumer banking behavior."),
+        ("FDIC · National rates and rate caps", "https://www.fdic.gov/national-rates-and-rate-caps", "Weekly FDIC national average rates for deposit products."),
+        ("CFPB · Bank account fees", "https://www.consumerfinance.gov/about-us/blog/", "CFPB consumer resources on overdraft, NSF, and account fees."),
+        ("Federal Reserve · Consumers and mobile financial services", "https://www.federalreserve.gov/data.htm", "Federal Reserve research on consumer banking behavior."),
     ],
     "debt-payoff": [
-        ("CFPB · Debt repayment strategies", "https://www.consumerfinance.gov/ask-cfpb/what-is-a-debt-management-plan-en-1457/", "CFPB explainer on debt management plans and repayment approaches."),
+        ("CFPB · Debt repayment strategies", "https://www.consumerfinance.gov/ask-cfpb/what-is-a-debt-relief-program-and-how-do-i-know-if-i-should-use-one-en-1457/", "CFPB explainer on debt management plans and repayment approaches."),
         ("FTC · Coping with debt", "https://consumer.ftc.gov/articles/coping-with-debt", "FTC guidance on negotiating with creditors and avoiding scams."),
         ("Federal Reserve · Household Debt and Credit Report", "https://www.newyorkfed.org/microeconomics/hhdc.html", "Quarterly New York Fed Center for Microeconomic Data report."),
     ],
     "refinancing": [
-        ("CFPB · Refinancing your mortgage", "https://www.consumerfinance.gov/owning-a-home/process/refinance/", "CFPB checklist and explainer for mortgage refinancing decisions."),
-        ("CFPB · Auto loan refinancing", "https://www.consumerfinance.gov/ask-cfpb/should-i-refinance-my-auto-loan-en-851/", "CFPB short answer on when refinancing an auto loan makes sense."),
+        ("CFPB · Refinancing your mortgage", "https://www.consumerfinance.gov/owning-a-home/", "CFPB checklist and explainer for mortgage refinancing decisions."),
+        ("CFPB · Auto loan refinancing", "https://www.consumerfinance.gov/consumer-tools/auto-loans/", "CFPB short answer on when refinancing an auto loan makes sense."),
         ("Federal Reserve · Mortgage rates (FRED)", "https://fred.stlouisfed.org/series/MORTGAGE30US", "Weekly 30-year fixed mortgage rate average used to gauge refinance timing."),
     ],
     "student-loans": [
@@ -2500,6 +2701,15 @@ def calculator_intro(title: str, desc: str) -> str:
 
 
 def calculator_module(calc_type: str) -> str:
+    # Charted calculators have their own DOM contracts (multi-row debt table,
+    # range slider, before/after grid, cumulative chart). Their per-page JS
+    # binds to these specific IDs.
+    if calc_type == "avalanche-snowball":
+        return _calc_module_avalanche_snowball()
+    if calc_type == "min-payment":
+        return _calc_module_min_payment()
+    if calc_type == "refinance":
+        return _calc_module_refinance()
     config = {
         "loan": {
             "fields": [
@@ -2571,6 +2781,145 @@ def calculator_module(calc_type: str) -> str:
                 <div><span>Payoff time</span><strong data-result="term">0 months</strong></div>
                 <div><span>Notes</span><strong data-result="note">Enter values and calculate.</strong></div>
               </div>
+            </div>
+          </div>
+        </section>
+        """
+    )
+
+
+def _calc_module_avalanche_snowball() -> str:
+    """Multi-debt input table + result cards + comparison table + chart canvas.
+    Per-page JS at /assets/scripts/debt-avalanche-snowball.js binds to these IDs.
+    No localStorage, no analytics, no input tracking — all math is browser-local."""
+    return trim(
+        """
+        <section class="ccg-section">
+          <div class="ccg-calc-card ccg-calc-card--charted" data-charted-calc="avalanche-snowball">
+            <h3 class="ccg-calc-title">Compare your debt payoff strategies</h3>
+            <div class="ccg-calc-row">
+              <label><span>Monthly payoff budget</span>
+                <input id="totalPayment" type="number" inputmode="decimal" min="1" step="10" value="600">
+              </label>
+            </div>
+            <div class="ccg-debt-table-wrap">
+              <table class="ccg-debt-input-table">
+                <thead>
+                  <tr><th>Debt name</th><th>Balance</th><th>APR (%)</th><th aria-label="Actions"></th></tr>
+                </thead>
+                <tbody id="debtRows"></tbody>
+              </table>
+            </div>
+            <button type="button" class="ccg-button ccg-button--ghost" id="addDebtBtn">+ Add another debt</button>
+            <p class="ccg-calc-help">You can compare up to 5 debts. The calculator assumes the full monthly payoff budget is available every month and that no new charges are added.</p>
+            <div id="debtWarning" class="ccg-calc-warning" hidden></div>
+            <div class="ccg-result-grid ccg-result-grid--three">
+              <div class="ccg-result-card"><span>Avalanche payoff</span><strong id="avalancheMonths">&mdash;</strong><span id="avalancheInterest">&mdash;</span></div>
+              <div class="ccg-result-card"><span>Snowball payoff</span><strong id="snowballMonths">&mdash;</strong><span id="snowballInterest">&mdash;</span></div>
+              <div class="ccg-result-card ccg-result-card--highlight"><span>Verdict</span><strong id="methodVerdict">&mdash;</strong><span id="methodVerdictSub">&mdash;</span></div>
+            </div>
+            <div class="ccg-calc-subsection">
+              <h4>Side-by-side comparison</h4>
+              <div class="ccg-table-wrap">
+                <table class="ccg-table">
+                  <thead><tr><th>Method</th><th>Months</th><th>Debt-free date</th><th>Total interest</th></tr></thead>
+                  <tbody>
+                    <tr><td>Avalanche</td><td id="avalancheTableMonths">&mdash;</td><td id="avalancheDate">&mdash;</td><td id="avalancheTableInterest">&mdash;</td></tr>
+                    <tr><td>Snowball</td><td id="snowballTableMonths">&mdash;</td><td id="snowballDate">&mdash;</td><td id="snowballTableInterest">&mdash;</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="ccg-calc-subsection">
+              <h4>Balance over time</h4>
+              <div class="ccg-chart-wrap"><canvas id="debtChart" height="160" role="img" aria-label="Balance over time for avalanche vs snowball"></canvas></div>
+            </div>
+          </div>
+        </section>
+        """
+    )
+
+
+def _calc_module_min_payment() -> str:
+    return trim(
+        """
+        <section class="ccg-section">
+          <div class="ccg-calc-card ccg-calc-card--charted" data-charted-calc="min-payment">
+            <h3 class="ccg-calc-title">Estimate the true cost of paying the minimum</h3>
+            <div class="ccg-calc-row">
+              <label><span>Credit card balance</span><input id="ccBalance" type="number" inputmode="decimal" min="0" step="50" value="5000"></label>
+              <label><span>APR (%)</span><input id="ccApr" type="number" inputmode="decimal" min="0" max="99" step="0.01" value="24.99"></label>
+              <label><span>Minimum payment %</span><input id="minPct" type="number" inputmode="decimal" min="0.1" max="10" step="0.1" value="2"></label>
+              <label><span>Minimum payment floor ($)</span><input id="minFloor" type="number" inputmode="decimal" min="0" step="5" value="25"></label>
+              <label class="ccg-calc-row__wide"><span>Extra monthly payment: <strong id="extraLabel">$50</strong></span>
+                <input id="extraPayment" type="range" min="0" max="500" step="10" value="50">
+              </label>
+            </div>
+            <div id="minWarning" class="ccg-calc-warning" hidden></div>
+            <div class="ccg-result-grid ccg-result-grid--three">
+              <div class="ccg-result-card ccg-result-card--highlight"><span>Minimum only</span><strong id="minHeadline">&mdash;</strong><span id="minInterest">&mdash;</span></div>
+              <div class="ccg-result-card"><span>With extra payment</span><strong id="extraHeadline">&mdash;</strong><span id="extraInterest">&mdash;</span></div>
+              <div class="ccg-result-card"><span>Estimated savings</span><strong id="savingsHeadline">&mdash;</strong><span id="timeSavings">&mdash;</span></div>
+            </div>
+            <div class="ccg-calc-subsection">
+              <h4>Minimum vs extra payment</h4>
+              <div class="ccg-table-wrap">
+                <table class="ccg-table">
+                  <thead><tr><th>Scenario</th><th>Months</th><th>Total interest</th><th>Interest / principal</th></tr></thead>
+                  <tbody>
+                    <tr><td>Minimum only</td><td id="minMonths">&mdash;</td><td id="minTotalInterest">&mdash;</td><td id="minRatio">&mdash;</td></tr>
+                    <tr><td>Minimum + extra</td><td id="extraMonths">&mdash;</td><td id="extraTotalInterest">&mdash;</td><td id="extraRatio">&mdash;</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="ccg-calc-subsection">
+              <h4>Cost comparison</h4>
+              <div class="ccg-chart-wrap"><canvas id="minPaymentChart" height="160" role="img" aria-label="Total interest and payoff months bar chart"></canvas></div>
+            </div>
+          </div>
+        </section>
+        """
+    )
+
+
+def _calc_module_refinance() -> str:
+    return trim(
+        """
+        <section class="ccg-section">
+          <div class="ccg-calc-card ccg-calc-card--charted" data-charted-calc="refinance">
+            <h3 class="ccg-calc-title">Estimate your refinance break-even point</h3>
+            <div class="ccg-calc-row">
+              <label><span>Current loan balance</span><input id="loanBalance" type="number" inputmode="decimal" min="0" step="1000" value="275000"></label>
+              <label><span>Current interest rate (%)</span><input id="currentRate" type="number" inputmode="decimal" min="0" max="30" step="0.01" value="7.25"></label>
+              <label><span>Remaining term (years)</span><input id="remainingYears" type="number" inputmode="numeric" min="1" max="40" step="1" value="25"></label>
+              <label><span>New interest rate (%)</span><input id="newRate" type="number" inputmode="decimal" min="0" max="30" step="0.01" value="6.25"></label>
+              <label><span>New loan term (years)</span><input id="newYears" type="number" inputmode="numeric" min="1" max="40" step="1" value="30"></label>
+              <label><span>Closing costs ($)</span><input id="closingCosts" type="number" inputmode="decimal" min="0" step="100" value="6500"></label>
+              <label><span>Planned sale or refi (years)</span><input id="plannedYears" type="number" inputmode="numeric" min="0" max="40" step="1" value="5"></label>
+            </div>
+            <div id="refiWarning" class="ccg-calc-warning" hidden></div>
+            <div class="ccg-result-grid ccg-result-grid--three">
+              <div class="ccg-result-card"><span>Current payment</span><strong id="oldPayment">&mdash;</strong><span>Principal &amp; interest estimate</span></div>
+              <div class="ccg-result-card"><span>New payment</span><strong id="newPayment">&mdash;</strong><span>Principal &amp; interest estimate</span></div>
+              <div class="ccg-result-card ccg-result-card--highlight"><span>Break-even point</span><strong id="breakEven">&mdash;</strong><span id="breakEvenSub">&mdash;</span></div>
+            </div>
+            <div class="ccg-calc-subsection">
+              <h4>Before / after refinance</h4>
+              <div class="ccg-table-wrap">
+                <table class="ccg-table">
+                  <thead><tr><th>Metric</th><th>Current loan</th><th>New refinance</th></tr></thead>
+                  <tbody>
+                    <tr><td>Monthly payment</td><td id="tableOldPayment">&mdash;</td><td id="tableNewPayment">&mdash;</td></tr>
+                    <tr><td>Remaining interest estimate</td><td id="oldInterest">&mdash;</td><td id="newInterest">&mdash;</td></tr>
+                    <tr><td>Closing costs</td><td>&mdash;</td><td id="tableClosingCosts">&mdash;</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="ccg-calc-subsection">
+              <h4>Cumulative savings after closing costs</h4>
+              <div class="ccg-chart-wrap"><canvas id="refiChart" height="160" role="img" aria-label="Cumulative refinance savings over time"></canvas></div>
             </div>
           </div>
         </section>
@@ -3400,6 +3749,7 @@ def html_doc(
     hero_title: str | None = None,
     hero_summary: str | None = None,
     is_404: bool = False,
+    extra_scripts: List[str] | None = None,
 ) -> str:
     canonical = url_for(path)
     indexable = is_indexable(path) and not is_404
@@ -3474,6 +3824,7 @@ def html_doc(
             </div>
           </div>
           <script src="{DOMAIN}/main.js" defer></script>
+          {''.join(extra_scripts or [])}
         </body>
         </html>
         """
@@ -3913,6 +4264,108 @@ def styles_css() -> str:
           .ccg-page-hero h1,
           .ccg-hero-home h1 { max-width: 14ch; }
         }
+
+        /* Charted calculators (avalanche-snowball, min-payment, refinance).
+           Custom widget layouts that don't fit the generic .ccg-calc-form grid. */
+        .ccg-calc-card--charted { padding: 1.4rem; display: grid; gap: 1.1rem; }
+        .ccg-calc-title { margin: 0 0 0.4rem; font-size: 1.25rem; }
+        .ccg-calc-row {
+          display: grid;
+          gap: 0.85rem;
+          grid-template-columns: 1fr;
+        }
+        @media (min-width: 640px) {
+          .ccg-calc-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (min-width: 960px) {
+          .ccg-calc-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        .ccg-calc-row__wide { grid-column: 1 / -1; }
+        .ccg-calc-row label { display: grid; gap: 0.35rem; font-weight: 700; }
+        .ccg-calc-row label span { color: var(--ccg-slate); font-weight: 600; font-size: 0.92rem; }
+        .ccg-calc-row input[type="number"],
+        .ccg-calc-row input[type="text"] {
+          min-height: 44px;
+          padding: 0.65rem 0.85rem;
+          border: 1px solid var(--ccg-line);
+          border-radius: 12px;
+          background: #fbfdff;
+          color: var(--ccg-ink);
+          font: inherit;
+        }
+        .ccg-calc-row input[type="range"] {
+          accent-color: var(--ccg-blue);
+          width: 100%;
+          padding: 0;
+          min-height: 32px;
+        }
+        .ccg-calc-row input:focus { outline: 2px solid var(--ccg-blue); outline-offset: 2px; }
+        .ccg-calc-help { color: var(--ccg-slate); font-size: 0.92rem; margin: 0; }
+        .ccg-calc-warning {
+          padding: 0.85rem 1rem;
+          border-radius: 12px;
+          border: 1px solid #b91c1c;
+          background: #fef2f2;
+          color: #b91c1c;
+          font-size: 0.95rem;
+        }
+        .ccg-calc-subsection { display: grid; gap: 0.7rem; }
+        .ccg-calc-subsection h4 { margin: 0; font-size: 1.05rem; }
+        .ccg-chart-wrap {
+          padding: 0.8rem;
+          background: #fbfdff;
+          border: 1px solid var(--ccg-line);
+          border-radius: 16px;
+        }
+        /* Multi-debt table for avalanche-snowball */
+        .ccg-debt-table-wrap { overflow-x: auto; }
+        .ccg-debt-input-table {
+          width: 100%;
+          min-width: 520px;
+          border-collapse: collapse;
+        }
+        .ccg-debt-input-table th,
+        .ccg-debt-input-table td {
+          padding: 0.6rem 0.55rem;
+          text-align: left;
+          border-bottom: 1px solid var(--ccg-line);
+          vertical-align: middle;
+        }
+        .ccg-debt-input-table input[type="text"],
+        .ccg-debt-input-table input[type="number"] {
+          width: 100%;
+          min-height: 40px;
+          padding: 0.45rem 0.6rem;
+          border: 1px solid var(--ccg-line);
+          border-radius: 10px;
+          background: #fbfdff;
+          color: var(--ccg-ink);
+          font: inherit;
+        }
+        .ccg-button--small { padding: 0.5rem 0.85rem; min-height: 38px; font-size: 0.88rem; }
+        /* Result cards */
+        .ccg-result-grid--three {
+          display: grid;
+          gap: 0.85rem;
+          grid-template-columns: 1fr;
+        }
+        @media (min-width: 720px) {
+          .ccg-result-grid--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        .ccg-result-card {
+          padding: 1rem 1.1rem;
+          border-radius: 16px;
+          border: 1px solid var(--ccg-line);
+          background: #fbfdff;
+          display: grid;
+          gap: 0.3rem;
+        }
+        .ccg-result-card span { color: var(--ccg-slate); font-size: 0.88rem; }
+        .ccg-result-card strong { font-size: 1.3rem; line-height: 1.2; }
+        .ccg-result-card--highlight {
+          background: linear-gradient(135deg, #eaf2ff 0%, #ffffff 100%);
+          border-color: var(--ccg-blue);
+        }
         """
     )
 
@@ -4241,6 +4694,312 @@ def robots_txt() -> str:
 
         Sitemap: {DOMAIN}/sitemap.xml
         """
+    )
+
+
+def calc_js_avalanche_snowball() -> str:
+    """Browser-local JavaScript for the avalanche-vs-snowball calculator.
+    No localStorage. No analytics. All math runs in the user's browser.
+    Binds to the DOM IDs emitted by _calc_module_avalanche_snowball()."""
+    return (
+        "(() => {\n"
+        "  const MAX_DEBTS = 5;\n"
+        "  const MAX_MONTHS = 600;\n"
+        "  let debtChart = null;\n"
+        "  const debtRows = document.getElementById(\"debtRows\");\n"
+        "  if (!debtRows) return;\n"
+        "  const addDebtBtn = document.getElementById(\"addDebtBtn\");\n"
+        "  const totalPaymentInput = document.getElementById(\"totalPayment\");\n"
+        "  const warning = document.getElementById(\"debtWarning\");\n"
+        "  const fmtMoney = (n) => new Intl.NumberFormat(\"en-US\", { style: \"currency\", currency: \"USD\", maximumFractionDigits: 0 }).format(Number.isFinite(n) ? n : 0);\n"
+        "  const fmtMonths = (m) => `${m} month${m === 1 ? \"\" : \"s\"}`;\n"
+        "  const defaultDebts = [\n"
+        "    { name: \"Credit card\", balance: 4200, apr: 24.99 },\n"
+        "    { name: \"Personal loan\", balance: 8000, apr: 12.5 },\n"
+        "    { name: \"Store card\", balance: 1200, apr: 28.99 }\n"
+        "  ];\n"
+        "  function addDebtRow(debt = { name: \"Debt\", balance: 1000, apr: 18 }) {\n"
+        "    if (debtRows.children.length >= MAX_DEBTS) return;\n"
+        "    const tr = document.createElement(\"tr\");\n"
+        "    tr.innerHTML = `\n"
+        "      <td><input class=\"debt-name\" type=\"text\" value=\"${debt.name}\" aria-label=\"Debt name\"></td>\n"
+        "      <td><input class=\"debt-balance\" type=\"number\" inputmode=\"decimal\" min=\"0\" step=\"50\" value=\"${debt.balance}\" aria-label=\"Debt balance\"></td>\n"
+        "      <td><input class=\"debt-apr\" type=\"number\" inputmode=\"decimal\" min=\"0\" max=\"99\" step=\"0.01\" value=\"${debt.apr}\" aria-label=\"Debt APR\"></td>\n"
+        "      <td><button type=\"button\" class=\"ccg-button ccg-button--ghost ccg-button--small remove-button\">Remove</button></td>\n"
+        "    `;\n"
+        "    debtRows.appendChild(tr);\n"
+        "    tr.querySelectorAll(\"input\").forEach(input => input.addEventListener(\"input\", calculate));\n"
+        "    tr.querySelector(\".remove-button\").addEventListener(\"click\", () => { tr.remove(); calculate(); });\n"
+        "    calculate();\n"
+        "  }\n"
+        "  function getDebts() {\n"
+        "    return Array.from(debtRows.querySelectorAll(\"tr\"))\n"
+        "      .map(row => ({\n"
+        "        name: row.querySelector(\".debt-name\").value.trim() || \"Debt\",\n"
+        "        balance: Math.max(0, parseFloat(row.querySelector(\".debt-balance\").value) || 0),\n"
+        "        apr: Math.max(0, parseFloat(row.querySelector(\".debt-apr\").value) || 0)\n"
+        "      }))\n"
+        "      .filter(d => d.balance > 0);\n"
+        "  }\n"
+        "  function simulate(strategy, debts, totalPayment) {\n"
+        "    let balances = debts.map(d => ({ ...d }));\n"
+        "    let totalInterest = 0;\n"
+        "    let months = 0;\n"
+        "    const timeline = [balances.reduce((s, d) => s + d.balance, 0)];\n"
+        "    while (balances.some(d => d.balance > 0.01) && months < MAX_MONTHS) {\n"
+        "      months += 1;\n"
+        "      let monthlyInterest = 0;\n"
+        "      balances.forEach(d => {\n"
+        "        if (d.balance <= 0) return;\n"
+        "        const interest = d.balance * (d.apr / 100 / 12);\n"
+        "        d.balance += interest;\n"
+        "        monthlyInterest += interest;\n"
+        "      });\n"
+        "      totalInterest += monthlyInterest;\n"
+        "      let paymentLeft = totalPayment;\n"
+        "      const active = balances.filter(d => d.balance > 0.01);\n"
+        "      active.sort((a, b) => strategy === \"avalanche\" ? (b.apr - a.apr || a.balance - b.balance) : (a.balance - b.balance || b.apr - a.apr));\n"
+        "      for (const debt of active) {\n"
+        "        if (paymentLeft <= 0) break;\n"
+        "        const payment = Math.min(paymentLeft, debt.balance);\n"
+        "        debt.balance -= payment;\n"
+        "        paymentLeft -= payment;\n"
+        "      }\n"
+        "      timeline.push(balances.reduce((s, d) => s + Math.max(0, d.balance), 0));\n"
+        "    }\n"
+        "    return { months, totalInterest, timeline, amortizes: months < MAX_MONTHS };\n"
+        "  }\n"
+        "  function debtFreeDate(months) {\n"
+        "    const d = new Date();\n"
+        "    d.setMonth(d.getMonth() + months);\n"
+        "    return d.toLocaleDateString(\"en-US\", { month: \"short\", year: \"numeric\" });\n"
+        "  }\n"
+        "  function updateChart(avalanche, snowball) {\n"
+        "    const ctx = document.getElementById(\"debtChart\");\n"
+        "    if (!ctx || typeof Chart === \"undefined\") return;\n"
+        "    const len = Math.max(avalanche.timeline.length, snowball.timeline.length);\n"
+        "    const labels = Array.from({ length: len }, (_, i) => i);\n"
+        "    if (debtChart) debtChart.destroy();\n"
+        "    debtChart = new Chart(ctx, {\n"
+        "      type: \"line\",\n"
+        "      data: { labels, datasets: [\n"
+        "        { label: \"Avalanche balance\", data: avalanche.timeline, borderColor: \"#1f6fff\", backgroundColor: \"rgba(31,111,255,0.12)\", tension: 0.25 },\n"
+        "        { label: \"Snowball balance\", data: snowball.timeline, borderColor: \"#e65100\", backgroundColor: \"rgba(230,81,0,0.12)\", tension: 0.25 }\n"
+        "      ]},\n"
+        "      options: {\n"
+        "        responsive: true,\n"
+        "        interaction: { mode: \"index\", intersect: false },\n"
+        "        plugins: { tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${fmtMoney(c.parsed.y)}` } } },\n"
+        "        scales: { y: { ticks: { callback: (v) => fmtMoney(v) } }, x: { title: { display: true, text: \"Months\" } } }\n"
+        "      }\n"
+        "    });\n"
+        "  }\n"
+        "  function calculate() {\n"
+        "    const debts = getDebts();\n"
+        "    const totalPayment = Math.max(0, parseFloat(totalPaymentInput.value) || 0);\n"
+        "    const monthlyInterest = debts.reduce((s, d) => s + d.balance * (d.apr / 100 / 12), 0);\n"
+        "    warning.hidden = true;\n"
+        "    warning.textContent = \"\";\n"
+        "    if (!debts.length || totalPayment <= 0) return;\n"
+        "    if (totalPayment <= monthlyInterest) {\n"
+        "      warning.hidden = false;\n"
+        "      warning.textContent = \"Your monthly payment may not cover estimated monthly interest across all debts. The balance can grow under these assumptions. Try a larger monthly payment.\";\n"
+        "    }\n"
+        "    const avalanche = simulate(\"avalanche\", debts, totalPayment);\n"
+        "    const snowball = simulate(\"snowball\", debts, totalPayment);\n"
+        "    const interestSaved = snowball.totalInterest - avalanche.totalInterest;\n"
+        "    const monthDiff = snowball.months - avalanche.months;\n"
+        "    document.getElementById(\"avalancheMonths\").textContent = avalanche.amortizes ? fmtMonths(avalanche.months) : \"600+ months\";\n"
+        "    document.getElementById(\"avalancheInterest\").textContent = `${fmtMoney(avalanche.totalInterest)} interest`;\n"
+        "    document.getElementById(\"snowballMonths\").textContent = snowball.amortizes ? fmtMonths(snowball.months) : \"600+ months\";\n"
+        "    document.getElementById(\"snowballInterest\").textContent = `${fmtMoney(snowball.totalInterest)} interest`;\n"
+        "    document.getElementById(\"avalancheTableMonths\").textContent = avalanche.amortizes ? avalanche.months : \"600+\";\n"
+        "    document.getElementById(\"snowballTableMonths\").textContent = snowball.amortizes ? snowball.months : \"600+\";\n"
+        "    document.getElementById(\"avalancheDate\").textContent = avalanche.amortizes ? debtFreeDate(avalanche.months) : \"Not estimated\";\n"
+        "    document.getElementById(\"snowballDate\").textContent = snowball.amortizes ? debtFreeDate(snowball.months) : \"Not estimated\";\n"
+        "    document.getElementById(\"avalancheTableInterest\").textContent = fmtMoney(avalanche.totalInterest);\n"
+        "    document.getElementById(\"snowballTableInterest\").textContent = fmtMoney(snowball.totalInterest);\n"
+        "    if (interestSaved > 0) document.getElementById(\"methodVerdict\").textContent = `Avalanche saves ${fmtMoney(interestSaved)}`;\n"
+        "    else if (interestSaved < 0) document.getElementById(\"methodVerdict\").textContent = `Snowball saves ${fmtMoney(Math.abs(interestSaved))}`;\n"
+        "    else document.getElementById(\"methodVerdict\").textContent = \"Both methods cost the same\";\n"
+        "    document.getElementById(\"methodVerdictSub\").textContent = monthDiff > 0 ? `Avalanche is ${monthDiff} month${monthDiff === 1 ? \"\" : \"s\"} faster.` : monthDiff < 0 ? `Snowball is ${Math.abs(monthDiff)} month${Math.abs(monthDiff) === 1 ? \"\" : \"s\"} faster.` : \"Same payoff time.\";\n"
+        "    updateChart(avalanche, snowball);\n"
+        "  }\n"
+        "  addDebtBtn.addEventListener(\"click\", () => addDebtRow());\n"
+        "  totalPaymentInput.addEventListener(\"input\", calculate);\n"
+        "  defaultDebts.forEach(addDebtRow);\n"
+        "})();\n"
+    )
+
+
+def calc_js_min_payment() -> str:
+    return (
+        "(() => {\n"
+        "  const MAX_MONTHS = 720;\n"
+        "  let chart = null;\n"
+        "  const fields = [\"ccBalance\", \"ccApr\", \"minPct\", \"minFloor\", \"extraPayment\"].reduce((acc, id) => { acc[id] = document.getElementById(id); return acc; }, {});\n"
+        "  if (!fields.ccBalance) return;\n"
+        "  const fmtMoney = (n) => new Intl.NumberFormat(\"en-US\", { style: \"currency\", currency: \"USD\", maximumFractionDigits: 0 }).format(Number.isFinite(n) ? n : 0);\n"
+        "  const fmtYearsMonths = (months) => {\n"
+        "    const y = Math.floor(months / 12);\n"
+        "    const m = months % 12;\n"
+        "    if (y <= 0) return `${m} month${m === 1 ? \"\" : \"s\"}`;\n"
+        "    return `${y} year${y === 1 ? \"\" : \"s\"}${m ? `, ${m} month${m === 1 ? \"\" : \"s\"}` : \"\"}`;\n"
+        "  };\n"
+        "  function simulate(balance, apr, minPct, minFloor, extra) {\n"
+        "    let current = balance;\n"
+        "    let months = 0;\n"
+        "    let interestPaid = 0;\n"
+        "    const monthlyRate = apr / 100 / 12;\n"
+        "    while (current > 0.01 && months < MAX_MONTHS) {\n"
+        "      months += 1;\n"
+        "      const interest = current * monthlyRate;\n"
+        "      current += interest;\n"
+        "      interestPaid += interest;\n"
+        "      const minPayment = Math.max(current * (minPct / 100), minFloor);\n"
+        "      const payment = Math.min(current, minPayment + extra);\n"
+        "      if (payment <= interest && monthlyRate > 0) return { months: MAX_MONTHS, interestPaid, amortizes: false };\n"
+        "      current -= payment;\n"
+        "    }\n"
+        "    return { months, interestPaid, amortizes: months < MAX_MONTHS };\n"
+        "  }\n"
+        "  function updateChart(minimum, extra) {\n"
+        "    const ctx = document.getElementById(\"minPaymentChart\");\n"
+        "    if (!ctx || typeof Chart === \"undefined\") return;\n"
+        "    if (chart) chart.destroy();\n"
+        "    chart = new Chart(ctx, {\n"
+        "      type: \"bar\",\n"
+        "      data: { labels: [\"Minimum only\", \"Minimum + extra\"], datasets: [\n"
+        "        { label: \"Total interest ($)\", data: [Math.round(minimum.interestPaid), Math.round(extra.interestPaid)], backgroundColor: \"#1f6fff\", yAxisID: \"y\" },\n"
+        "        { label: \"Months to payoff\", data: [minimum.months, extra.months], backgroundColor: \"#e65100\", yAxisID: \"y1\" }\n"
+        "      ]},\n"
+        "      options: {\n"
+        "        responsive: true,\n"
+        "        plugins: { tooltip: { callbacks: { label: (c) => c.dataset.label.includes(\"interest\") ? `${c.dataset.label}: ${fmtMoney(c.parsed.y)}` : `${c.dataset.label}: ${c.parsed.y}` } } },\n"
+        "        scales: { y: { type: \"linear\", position: \"left\", ticks: { callback: (v) => fmtMoney(v) } }, y1: { type: \"linear\", position: \"right\", grid: { drawOnChartArea: false } } }\n"
+        "      }\n"
+        "    });\n"
+        "  }\n"
+        "  function calculate() {\n"
+        "    const balance = Math.max(0, parseFloat(fields.ccBalance.value) || 0);\n"
+        "    const apr = Math.max(0, parseFloat(fields.ccApr.value) || 0);\n"
+        "    const minPct = Math.max(0.1, parseFloat(fields.minPct.value) || 2);\n"
+        "    const minFloor = Math.max(0, parseFloat(fields.minFloor.value) || 25);\n"
+        "    const extraPayment = Math.max(0, parseFloat(fields.extraPayment.value) || 0);\n"
+        "    document.getElementById(\"extraLabel\").textContent = fmtMoney(extraPayment);\n"
+        "    const warning = document.getElementById(\"minWarning\");\n"
+        "    warning.hidden = true;\n"
+        "    if (balance <= 0) return;\n"
+        "    const minimum = simulate(balance, apr, minPct, minFloor, 0);\n"
+        "    const extra = simulate(balance, apr, minPct, minFloor, extraPayment);\n"
+        "    if (!minimum.amortizes) {\n"
+        "      warning.hidden = false;\n"
+        "      warning.textContent = \"The entered minimum-payment settings may not pay off this balance within 60 years. Increase the payment, raise the floor, or contact a nonprofit credit counselor.\";\n"
+        "    }\n"
+        "    const interestSavings = minimum.interestPaid - extra.interestPaid;\n"
+        "    const monthSavings = minimum.months - extra.months;\n"
+        "    document.getElementById(\"minHeadline\").textContent = minimum.amortizes ? fmtYearsMonths(minimum.months) : \"60+ years\";\n"
+        "    document.getElementById(\"minInterest\").textContent = `${fmtMoney(minimum.interestPaid)} estimated interest`;\n"
+        "    document.getElementById(\"extraHeadline\").textContent = extra.amortizes ? fmtYearsMonths(extra.months) : \"60+ years\";\n"
+        "    document.getElementById(\"extraInterest\").textContent = `${fmtMoney(extra.interestPaid)} estimated interest`;\n"
+        "    document.getElementById(\"savingsHeadline\").textContent = fmtMoney(Math.max(0, interestSavings));\n"
+        "    const ms = Math.max(0, monthSavings);\n"
+        "    document.getElementById(\"timeSavings\").textContent = `${ms} month${ms === 1 ? \"\" : \"s\"} faster`;\n"
+        "    document.getElementById(\"minMonths\").textContent = minimum.amortizes ? minimum.months : \"720+\";\n"
+        "    document.getElementById(\"extraMonths\").textContent = extra.amortizes ? extra.months : \"720+\";\n"
+        "    document.getElementById(\"minTotalInterest\").textContent = fmtMoney(minimum.interestPaid);\n"
+        "    document.getElementById(\"extraTotalInterest\").textContent = fmtMoney(extra.interestPaid);\n"
+        "    document.getElementById(\"minRatio\").textContent = balance > 0 ? `${((minimum.interestPaid / balance) * 100).toFixed(1)}%` : \"\\u2014\";\n"
+        "    document.getElementById(\"extraRatio\").textContent = balance > 0 ? `${((extra.interestPaid / balance) * 100).toFixed(1)}%` : \"\\u2014\";\n"
+        "    updateChart(minimum, extra);\n"
+        "  }\n"
+        "  Object.values(fields).forEach(f => f.addEventListener(\"input\", calculate));\n"
+        "  calculate();\n"
+        "})();\n"
+    )
+
+
+def calc_js_refinance() -> str:
+    return (
+        "(() => {\n"
+        "  let chart = null;\n"
+        "  const ids = [\"loanBalance\", \"currentRate\", \"remainingYears\", \"newRate\", \"newYears\", \"closingCosts\", \"plannedYears\"];\n"
+        "  const el = ids.reduce((acc, id) => { acc[id] = document.getElementById(id); return acc; }, {});\n"
+        "  if (!el.loanBalance) return;\n"
+        "  const fmtMoney = (n) => new Intl.NumberFormat(\"en-US\", { style: \"currency\", currency: \"USD\", maximumFractionDigits: 0 }).format(Number.isFinite(n) ? n : 0);\n"
+        "  const fmtMonths = (m) => `${m} month${m === 1 ? \"\" : \"s\"}`;\n"
+        "  function payment(principal, annualRate, years) {\n"
+        "    const n = years * 12;\n"
+        "    const r = annualRate / 100 / 12;\n"
+        "    if (principal <= 0 || n <= 0) return 0;\n"
+        "    if (r === 0) return principal / n;\n"
+        "    return principal * r / (1 - Math.pow(1 + r, -n));\n"
+        "  }\n"
+        "  function updateChart(monthlySavings, closingCosts, horizonMonths) {\n"
+        "    const ctx = document.getElementById(\"refiChart\");\n"
+        "    if (!ctx || typeof Chart === \"undefined\") return;\n"
+        "    const months = Math.min(Math.max(horizonMonths, 12), 360);\n"
+        "    const labels = [];\n"
+        "    const values = [];\n"
+        "    const step = Math.max(1, Math.round(months / 24));\n"
+        "    for (let i = 0; i <= months; i += step) {\n"
+        "      labels.push(i);\n"
+        "      values.push((monthlySavings * i) - closingCosts);\n"
+        "    }\n"
+        "    if (chart) chart.destroy();\n"
+        "    chart = new Chart(ctx, {\n"
+        "      type: \"line\",\n"
+        "      data: { labels, datasets: [{ label: \"Cumulative savings after closing costs\", data: values, borderColor: \"#1f6fff\", backgroundColor: \"rgba(31,111,255,0.12)\", tension: 0.2, fill: true }]},\n"
+        "      options: {\n"
+        "        responsive: true,\n"
+        "        plugins: { tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${fmtMoney(c.parsed.y)}` } } },\n"
+        "        scales: { y: { ticks: { callback: (v) => fmtMoney(v) } }, x: { title: { display: true, text: \"Months\" } } }\n"
+        "      }\n"
+        "    });\n"
+        "  }\n"
+        "  function calculate() {\n"
+        "    const balance = Math.max(0, parseFloat(el.loanBalance.value) || 0);\n"
+        "    const currentRate = Math.max(0, parseFloat(el.currentRate.value) || 0);\n"
+        "    const remainingYears = Math.max(1, parseFloat(el.remainingYears.value) || 1);\n"
+        "    const newRate = Math.max(0, parseFloat(el.newRate.value) || 0);\n"
+        "    const newYears = Math.max(1, parseFloat(el.newYears.value) || 1);\n"
+        "    const closingCosts = Math.max(0, parseFloat(el.closingCosts.value) || 0);\n"
+        "    const plannedYears = Math.max(0, parseFloat(el.plannedYears.value) || 0);\n"
+        "    const oldPmt = payment(balance, currentRate, remainingYears);\n"
+        "    const newPmt = payment(balance, newRate, newYears);\n"
+        "    const monthlySavings = oldPmt - newPmt;\n"
+        "    const breakEvenMonths = monthlySavings > 0 ? Math.ceil(closingCosts / monthlySavings) : Infinity;\n"
+        "    const oldInterest = (oldPmt * remainingYears * 12) - balance;\n"
+        "    const newInterest = (newPmt * newYears * 12) - balance;\n"
+        "    document.getElementById(\"oldPayment\").textContent = fmtMoney(oldPmt);\n"
+        "    document.getElementById(\"newPayment\").textContent = fmtMoney(newPmt);\n"
+        "    document.getElementById(\"tableOldPayment\").textContent = fmtMoney(oldPmt);\n"
+        "    document.getElementById(\"tableNewPayment\").textContent = fmtMoney(newPmt);\n"
+        "    document.getElementById(\"oldInterest\").textContent = fmtMoney(oldInterest);\n"
+        "    document.getElementById(\"newInterest\").textContent = fmtMoney(newInterest);\n"
+        "    document.getElementById(\"tableClosingCosts\").textContent = fmtMoney(closingCosts);\n"
+        "    const warning = document.getElementById(\"refiWarning\");\n"
+        "    warning.hidden = true;\n"
+        "    if (!Number.isFinite(breakEvenMonths)) {\n"
+        "      document.getElementById(\"breakEven\").textContent = \"No monthly break-even\";\n"
+        "      document.getElementById(\"breakEvenSub\").textContent = \"The new payment is not lower than the current payment.\";\n"
+        "      warning.hidden = false;\n"
+        "      warning.textContent = \"This refinance does not lower the estimated principal-and-interest payment. Review the offer carefully and confirm the Loan Estimate.\";\n"
+        "      updateChart(monthlySavings, closingCosts, plannedYears * 12 || 120);\n"
+        "      return;\n"
+        "    }\n"
+        "    document.getElementById(\"breakEven\").textContent = fmtMonths(breakEvenMonths);\n"
+        "    document.getElementById(\"breakEvenSub\").textContent = `After that, estimated savings are ${fmtMoney(monthlySavings)}/month.`;\n"
+        "    const plannedMonths = plannedYears * 12;\n"
+        "    if (plannedMonths > 0 && plannedMonths < breakEvenMonths) {\n"
+        "      warning.hidden = false;\n"
+        "      warning.textContent = `Warning: your planned sale or next refinance is in ${plannedMonths} months \\u2014 before the estimated break-even point of ${breakEvenMonths} months. This refinance may not recover closing costs through monthly savings.`;\n"
+        "    }\n"
+        "    updateChart(monthlySavings, closingCosts, plannedMonths || newYears * 12);\n"
+        "  }\n"
+        "  Object.values(el).forEach(input => input.addEventListener(\"input\", calculate));\n"
+        "  calculate();\n"
+        "})();\n"
     )
 
 
@@ -4574,6 +5333,16 @@ def build() -> None:
             body, faqs = calculator_body(path, title, desc, calc_type, related)
         if path in SMARTCREDIT_PAGES:
             body = smartcredit_inject(body)
+        # Charted calculators load Chart.js (defer) and their dedicated per-page
+        # JS bundle. Other calculators rely on main.js wireCalculators().
+        extra_scripts: List[str] = []
+        if calc_type in CHARTED_CALCS:
+            extra_scripts.append(
+                '<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js" defer></script>'
+            )
+            extra_scripts.append(
+                f'<script src="{DOMAIN}/assets/scripts/{CHARTED_CALCS[calc_type]}" defer></script>'
+            )
         doc = html_doc(
             path=path,
             title=title,
@@ -4584,6 +5353,7 @@ def build() -> None:
             faqs=faqs,
             hero_title=title,
             hero_summary=desc,
+            extra_scripts=extra_scripts,
         )
         write(TARGET / path, doc)
 
@@ -4643,8 +5413,10 @@ def build() -> None:
             page_type="article",
             main_content=author_body,
             breadcrumbs=[
+                # Two-level breadcrumb only — there is no /authors index page,
+                # so we go straight from Home to the author profile to avoid a
+                # broken intermediate link.
                 {"name": "Home", "url": f"{DOMAIN}/"},
-                {"name": "Authors", "url": f"{DOMAIN}/authors"},
                 {"name": EDITOR_NAME, "url": f"{DOMAIN}/authors/javi-perez"},
             ],
             faqs=author_faqs,
@@ -4688,6 +5460,10 @@ def build() -> None:
 
     write(TARGET / "styles.css", styles_css())
     write(TARGET / "main.js", main_js())
+    # Per-page JS bundles for charted calculators.
+    write(TARGET / "assets" / "scripts" / "debt-avalanche-snowball.js", calc_js_avalanche_snowball())
+    write(TARGET / "assets" / "scripts" / "minimum-payment-true-cost.js", calc_js_min_payment())
+    write(TARGET / "assets" / "scripts" / "refinance-break-even.js", calc_js_refinance())
     write(TARGET / "robots.txt", robots_txt())
     write(TARGET / "sitemap.xml", sitemap_xml(all_paths))
     write(TARGET / "_redirects", redirects_txt(all_paths))

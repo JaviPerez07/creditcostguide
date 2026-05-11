@@ -428,3 +428,105 @@ main { padding-bottom: 5rem; }
   .ccg-page-hero h1,
   .ccg-hero-home h1 { max-width: 14ch; }
 }
+
+/* Charted calculators (avalanche-snowball, min-payment, refinance).
+   Custom widget layouts that don't fit the generic .ccg-calc-form grid. */
+.ccg-calc-card--charted { padding: 1.4rem; display: grid; gap: 1.1rem; }
+.ccg-calc-title { margin: 0 0 0.4rem; font-size: 1.25rem; }
+.ccg-calc-row {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .ccg-calc-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 960px) {
+  .ccg-calc-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.ccg-calc-row__wide { grid-column: 1 / -1; }
+.ccg-calc-row label { display: grid; gap: 0.35rem; font-weight: 700; }
+.ccg-calc-row label span { color: var(--ccg-slate); font-weight: 600; font-size: 0.92rem; }
+.ccg-calc-row input[type="number"],
+.ccg-calc-row input[type="text"] {
+  min-height: 44px;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--ccg-line);
+  border-radius: 12px;
+  background: #fbfdff;
+  color: var(--ccg-ink);
+  font: inherit;
+}
+.ccg-calc-row input[type="range"] {
+  accent-color: var(--ccg-blue);
+  width: 100%;
+  padding: 0;
+  min-height: 32px;
+}
+.ccg-calc-row input:focus { outline: 2px solid var(--ccg-blue); outline-offset: 2px; }
+.ccg-calc-help { color: var(--ccg-slate); font-size: 0.92rem; margin: 0; }
+.ccg-calc-warning {
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #b91c1c;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.95rem;
+}
+.ccg-calc-subsection { display: grid; gap: 0.7rem; }
+.ccg-calc-subsection h4 { margin: 0; font-size: 1.05rem; }
+.ccg-chart-wrap {
+  padding: 0.8rem;
+  background: #fbfdff;
+  border: 1px solid var(--ccg-line);
+  border-radius: 16px;
+}
+/* Multi-debt table for avalanche-snowball */
+.ccg-debt-table-wrap { overflow-x: auto; }
+.ccg-debt-input-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+}
+.ccg-debt-input-table th,
+.ccg-debt-input-table td {
+  padding: 0.6rem 0.55rem;
+  text-align: left;
+  border-bottom: 1px solid var(--ccg-line);
+  vertical-align: middle;
+}
+.ccg-debt-input-table input[type="text"],
+.ccg-debt-input-table input[type="number"] {
+  width: 100%;
+  min-height: 40px;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--ccg-line);
+  border-radius: 10px;
+  background: #fbfdff;
+  color: var(--ccg-ink);
+  font: inherit;
+}
+.ccg-button--small { padding: 0.5rem 0.85rem; min-height: 38px; font-size: 0.88rem; }
+/* Result cards */
+.ccg-result-grid--three {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 720px) {
+  .ccg-result-grid--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.ccg-result-card {
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  border: 1px solid var(--ccg-line);
+  background: #fbfdff;
+  display: grid;
+  gap: 0.3rem;
+}
+.ccg-result-card span { color: var(--ccg-slate); font-size: 0.88rem; }
+.ccg-result-card strong { font-size: 1.3rem; line-height: 1.2; }
+.ccg-result-card--highlight {
+  background: linear-gradient(135deg, #eaf2ff 0%, #ffffff 100%);
+  border-color: var(--ccg-blue);
+}

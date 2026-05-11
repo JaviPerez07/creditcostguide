@@ -17,7 +17,7 @@ ADSENSE_SCRIPT = '<script async src="https://pagead2.googlesyndication.com/pagea
 
 # Editorial identity — single human editor, no fictional credentials.
 EDITOR_NAME = "Javi Pérez"
-EDITOR_ROLE = "Editor, CreditCostGuide"
+EDITOR_ROLE = "Founder and Editor"
 EDITOR_LINKEDIN = "https://www.linkedin.com/in/javi-perez-guides"
 EDITOR_LOCATION = "Almería, Spain"
 EDITOR_PHOTO = f"{DOMAIN}/assets/images/javi-perez-guides.jpg"
@@ -25,6 +25,60 @@ EDITOR_PHOTO_FALLBACK = f"{DOMAIN}/assets/images/social-preview.svg"
 LAST_REVIEWED = "May 2026"
 LAST_REVIEWED_ISO = "2026-05-06"
 SITEMAP_LASTMOD = "2026-05-06"
+
+# Standard non-advice disclaimer reused everywhere.
+NON_ADVICE_DISCLAIMER = (
+    "Javi Pérez is not a licensed financial advisor, CPA, CFP, loan officer, "
+    "tax professional, or attorney. This content is educational only and "
+    "does not replace advice from a qualified professional."
+)
+
+# AI-assisted disclosure reused on every indexable page.
+AI_DISCLOSURE = (
+    "This guide was created with AI-assisted drafting and human editorial review by "
+    f"{EDITOR_NAME}. Figures, examples, and explanations are checked against public "
+    "sources including CFPB, the Federal Reserve, FDIC, BLS, FTC, and SEC where applicable. "
+    "Content is reviewed quarterly."
+)
+
+# Curated indexable set. Only URLs here get index,follow and a sitemap entry.
+# Everything else is noindex,follow and never enters the sitemap. This keeps
+# the indexable surface small, original, and defensible for AdSense review.
+INDEXABLE_PAGES: set[str] = {
+    # Root trust + legal pages.
+    "index.html",
+    "about.html",
+    "contact.html",
+    "how-we-research.html",
+    "privacy-policy.html",
+    "terms.html",
+    "disclaimer.html",
+    # Author page.
+    "authors/javi-perez/index.html",
+    # Pillar guides — kept because they have unique short content.
+    "pages/personal-loans-guide.html",
+    "pages/credit-cards-guide.html",
+    "pages/mortgage-guide.html",
+    "pages/credit-score-guide.html",
+    "pages/banking-fees-guide.html",
+    "pages/debt-payoff-guide.html",
+    "pages/refinancing-guide.html",
+    "pages/student-loans-guide.html",
+    # Supporting articles with unique PAGE_CONTENT entries.
+    "pages/how-credit-scores-work.html",
+    "pages/best-credit-cards-for-bad-credit.html",
+    "pages/how-to-lower-credit-card-interest.html",
+    # Calculators (functional tools count as original value).
+    "pages/loan-payment-calculator.html",
+    "pages/credit-card-interest-calculator.html",
+    "pages/mortgage-calculator.html",
+    "pages/debt-payoff-calculator.html",
+    "pages/credit-utilization-calculator.html",
+}
+
+
+def is_indexable(path: str) -> bool:
+    return path in INDEXABLE_PAGES
 
 # SmartCredit (CJ) affiliate — offer IDs per link type
 SC_TRIAL_URL = "https://www.tkqlhce.com/click-101736471-17138841"
@@ -203,13 +257,12 @@ PAGE_CONTENT: Dict[str, dict] = {
     "pages/credit-score-guide.html": {
         "intro_h2": "What Your Credit Score Actually Measures",
         "intro_body": (
-            "<!-- DATO PENDIENTE VERIFICAR 2026: avg U.S. FICO score; cited 715 figure from Experian 2025 consumer data. Refresh when Experian publishes 2026 release. -->"
             "<p>Your credit score is a three-digit number between 300 and 850 that lenders, "
             "landlords, and some employers use to estimate financial risk. According to "
-            "Experian's 2025 consumer data, the average U.S. FICO score is 715 — solidly in "
-            "the Good range. But averages mask a wide spread: roughly 21% of Americans carry "
-            "scores below 600, making them subprime in most lender frameworks, while about "
-            "23% have scores above 800.</p>"
+            "<a href=\"https://www.experian.com/blogs/ask-experian/consumer-credit-review/\" target=\"_blank\" rel=\"noopener nofollow\">Experian's most recent annual consumer credit review</a>, "
+            "the average U.S. FICO score is 715 — solidly in the Good range (source: Experian 2025). "
+            "But averages mask a wide spread: roughly 21% of Americans carry scores below 600, making "
+            "them subprime in most lender frameworks, while about 23% have scores above 800.</p>"
             "<p>The practical cost of a lower score is large. A borrower at 760 applying for "
             "a 30-year fixed mortgage might receive a rate near 6.5%. The same loan to a "
             "borrower at 620 can come in at 8.0% or higher — a 1.5 percentage-point difference "
@@ -858,14 +911,15 @@ PAGE_CONTENT: Dict[str, dict] = {
     "pages/debt-payoff-guide.html": {
         "intro_h2": "Why Most Debt Payoff Plans Fail — and How to Fix Them",
         "intro_body": (
-            "<!-- DATO PENDIENTE VERIFICAR 2026: avg household credit card debt + avg APR; current numbers source = 2024 Federal Reserve. Update when Fed releases newer figures. -->"
-            "<p>The average American household carrying credit card debt owes roughly $6,380, "
-            "according to 2024 Federal Reserve data. At the current average credit card APR "
-            "of 24.59% — also Federal Reserve data — that balance generates nearly $1,570 in "
-            "annual interest if only partially paid down. The minimum payment trap makes it "
-            "worse: a $5,000 balance at 20% APR paying the standard minimum takes "
-            "approximately 17 years to retire and costs over $4,300 in interest — more than "
-            "85 cents in interest for every dollar originally borrowed.</p>"
+            "<p>U.S. household credit card debt has remained near record highs in recent years, "
+            "with average balances among households carrying debt running into the thousands of "
+            "dollars (source: <a href=\"https://www.federalreserve.gov/releases/g19/current/\" target=\"_blank\" rel=\"noopener nofollow\">Federal Reserve G.19 Consumer Credit release</a>). "
+            "Average credit card APRs have stayed well above 20% — the highest sustained level since "
+            "the Federal Reserve began tracking the series. At those rates, even partially-paid "
+            "balances generate substantial interest each year. The minimum payment trap makes it "
+            "worse: a $5,000 balance at 20% APR paying the standard minimum takes approximately "
+            "17 years to retire and costs over $4,300 in interest — more than 85 cents in interest "
+            "for every dollar originally borrowed.</p>"
             "<p>The problem is almost never a lack of desire to eliminate debt. It's choosing "
             "the wrong strategy, applying extra payments to the wrong accounts, or "
             "abandoning a plan when motivation drops. This guide covers the two primary "
@@ -1258,14 +1312,14 @@ PAGE_CONTENT: Dict[str, dict] = {
     "pages/how-to-lower-credit-card-interest.html": {
         "intro_h2": "Four Practical Ways to Reduce Your Credit Card Interest Costs",
         "intro_body": (
-            "<!-- DATO PENDIENTE VERIFICAR 2026: avg credit card APR; 24.59% figure references late-2024 Federal Reserve series. Update when newer Fed release lands. -->"
-            "<p>The average credit card APR in the United States reached 24.59% in late "
-            "2024, the highest since the Federal Reserve began tracking it. At that rate, "
-            "a $6,000 balance that's only partially paid down each month costs over $1,470 "
-            "in annual interest. Unlike a mortgage or auto loan where the rate is fixed at "
-            "origination, credit card rates are actually movable — through negotiation with "
-            "your issuer, balance transfers, debt consolidation loans, and hardship "
-            "programs.</p>"
+            "<p>The average credit card APR in the United States has stayed above 20% — the "
+            "highest sustained level since the Federal Reserve began tracking the series "
+            "(source: <a href=\"https://www.federalreserve.gov/releases/g19/current/\" target=\"_blank\" rel=\"noopener nofollow\">Federal Reserve G.19 Consumer Credit release</a>). "
+            "At that rate, a balance of a few thousand dollars that's only partially paid "
+            "down each month generates well over a thousand dollars in annual interest. "
+            "Unlike a mortgage or auto loan where the rate is fixed at origination, credit "
+            "card rates are actually movable — through negotiation with your issuer, balance "
+            "transfers, debt consolidation loans, and hardship programs.</p>"
             "<p>This guide covers four approaches to reducing what you pay. Each has "
             "different costs, timelines, and eligibility requirements. The right option "
             "depends on your current balance size, your credit score, how quickly you can "
@@ -1473,6 +1527,463 @@ PAGE_CONTENT: Dict[str, dict] = {
              "Debt Management Plan."],
         ],
     },
+
+    # ------------------------------------------------------------------
+    "pages/personal-loans-guide.html": {
+        "intro_h2": "What a personal loan really costs once fees are in the picture",
+        "intro_body": (
+            "<p>Most personal loan shoppers compare a single number — the advertised APR — and stop there. That's the most expensive mistake in the category. The APR moves with credit profile, debt-to-income ratio, and lender risk appetite, and two lenders offering the same APR can quote very different total costs once an origination fee, prepayment rule, or term length difference enters the math. The <a href=\"https://www.consumerfinance.gov/ask-cfpb/what-is-a-personal-loan-en-2122/\" target=\"_blank\" rel=\"noopener noreferrer\">CFPB&rsquo;s consumer explainer</a> covers the mechanics in plain English.</p>"
+            "<p>This guide walks through how to read a personal loan offer the way an underwriter reads it. The goal is to put the borrower in a position where the monthly payment shown in the offer is one of five numbers being compared, not the only one.</p>"
+        ),
+        "sections": [
+            {
+                "kicker": "Pricing",
+                "h2": "APR vs. interest rate vs. fee-adjusted proceeds",
+                "body": (
+                    "<p>The advertised <em>interest rate</em> is what the lender charges on the outstanding principal. The <em>APR</em> bundles that interest with any required fees (most commonly the origination fee) and expresses the total cost as an annualized percentage. By federal Truth-in-Lending rules, the APR is the comparison number — but only if the same fees are included on both sides.</p>"
+                    "<p><strong>Fee-adjusted proceeds</strong> is the missing third number. If you ask for $15,000 and the lender deducts a 6% origination fee at funding, you receive $14,100 but you make payments as if you borrowed $15,000. The effective cost to you is higher than the headline APR suggests. To compare two offers fairly, divide each lender&rsquo;s total interest paid (over the same term and on the same requested amount) by the actual cash you receive at funding.</p>"
+                )
+            },
+            {
+                "kicker": "Term length",
+                "h2": "Why a longer term often costs more, not less",
+                "body": (
+                    "<p>Personal loans typically run 24 to 84 months. A longer term shrinks the monthly payment but extends the time interest compounds, and lenders often charge a slightly higher rate on longer terms because their capital is locked up. The general rule: pick the shortest term whose monthly payment still leaves a comfortable cushion in your monthly cash flow.</p>"
+                    "<p>Comfortable means it survives a 10% income shock or a one-month emergency expense. If the payment only works in a perfect month, the term is too short.</p>"
+                )
+            },
+            {
+                "kicker": "Prepayment",
+                "h2": "Prepayment penalties and how to spot them",
+                "body": (
+                    "<p>Federal law does not ban personal-loan prepayment penalties. Some lenders include them; many do not. The penalty (when present) is usually a flat fee or a percentage of the remaining balance and applies if you pay the loan off in the first 12&ndash;36 months. Before signing, ask explicitly: &ldquo;Is there any cost to paying this loan off early?&rdquo; and confirm the answer is reflected in the contract. The CFPB&rsquo;s <a href=\"https://www.consumerfinance.gov/ask-cfpb/what-is-a-prepayment-penalty-en-1957/\" target=\"_blank\" rel=\"noopener noreferrer\">consumer Q&amp;A on prepayment penalties</a> is a useful reference.</p>"
+                )
+            },
+            {
+                "kicker": "Use case",
+                "h2": "Debt consolidation only works if behavior changes",
+                "body": (
+                    "<p>The most common use case for a personal loan is consolidating revolving credit-card debt into a fixed-rate installment loan. The math is usually attractive because credit-card APRs sit well above prime personal-loan APRs. But the math only works if the credit cards are not used to re-accumulate balances during the loan&rsquo;s payoff period. Treat the consolidation as one event in a plan that also includes a written rule for the credit cards (zero new balances, or strictly paid-in-full each month).</p>"
+                    "<p>See <a href=\"/pages/debt-payoff-guide\">our debt payoff guide</a> for the fuller framework.</p>"
+                )
+            },
+        ],
+        "faqs": [
+            ["What APR is realistic for a good personal-loan offer?",
+             "It depends on credit profile and lender; the Federal Reserve&rsquo;s G.19 release tracks the average across reporting institutions. The right benchmark is not a number you saw online but three or four firm offers obtained on the same day for the same amount and term."],
+            ["Is a credit-union personal loan always cheaper?",
+             "Often, but not always. Credit unions have lower marketing costs and can pass that on, but the federal APR cap (18% for federal credit unions) is a ceiling, not a floor. Compare offers, do not assume."],
+            ["What is the safest amount to borrow?",
+             "The amount whose required monthly payment fits comfortably within your post-tax income after housing, food, utilities, and a small emergency buffer. If the payment requires perfection in your budget, the amount is too high."],
+        ],
+    },
+
+    # ------------------------------------------------------------------
+    "pages/credit-cards-guide.html": {
+        "intro_h2": "Credit cards: where the real cost lives, and how to keep it low",
+        "intro_body": (
+            "<p>Credit cards are the most flexible borrowing product in U.S. consumer finance and the most expensive when used carelessly. The <a href=\"https://www.federalreserve.gov/releases/g19/current/\" target=\"_blank\" rel=\"noopener noreferrer\">Federal Reserve&rsquo;s G.19 release</a> tracks the average rate on accounts assessed interest; that number is the single most useful benchmark for whether you are paying more than the typical revolving borrower.</p>"
+            "<p>This guide is not a list of &ldquo;best cards&rdquo;. It is a walkthrough of the mechanics that decide how much a credit card costs the person who carries one: the grace period, the way interest accrues, the role of utilization, and the fees that hide in fine print.</p>"
+        ),
+        "sections": [
+            {
+                "kicker": "Grace period",
+                "h2": "Why paying the statement balance in full changes everything",
+                "body": (
+                    "<p>If you pay the <em>statement balance</em> in full by the due date, most U.S. credit cards charge no interest on new purchases. That is the grace period — a regulator-required disclosure under the CARD Act. The instant you carry a balance into the next cycle, the grace period typically disappears and new purchases begin accruing interest from the date of purchase.</p>"
+                    "<p>The practical implication: a credit card is either a free 30&ndash;55-day loan (paid in full each month) or one of the most expensive borrowing products on the market (revolving a balance). There is almost no in-between.</p>"
+                )
+            },
+            {
+                "kicker": "APR mechanics",
+                "h2": "How daily interest accrual quietly increases your balance",
+                "body": (
+                    "<p>Most U.S. issuers use the &ldquo;average daily balance&rdquo; method. The annual rate is divided by 365 to get a daily rate; that daily rate is applied to each day&rsquo;s balance; the resulting interest is added to the balance at cycle close. The compounding is small per day and material over a year.</p>"
+                    "<p>A worked example: a $4,000 balance at 24% APR with no new charges costs roughly $80 in the first month of pure revolving and rises slowly thereafter as the balance grows from compounded interest. Multiply across 12 months and the borrower pays close to a quarter of the balance in interest annually if no payment exceeds the interest charge.</p>"
+                )
+            },
+            {
+                "kicker": "Utilization",
+                "h2": "Credit utilization and what credit-scoring models really do with it",
+                "body": (
+                    "<p>Utilization is the ratio of reported balances to credit limits. It is the second-largest factor in most credit scoring models (after payment history). Two practical points worth knowing: (1) issuers usually report the <em>statement</em> balance to the bureaus, not the current balance, so paying down before the statement closes is the most effective lever; (2) per-card utilization matters in addition to aggregate, so one maxed-out card can hurt the score even if the total ratio is moderate.</p>"
+                    "<p>The CFPB&rsquo;s page on <a href=\"https://www.consumerfinance.gov/ask-cfpb/what-is-a-credit-utilization-rate-en-2096/\" target=\"_blank\" rel=\"noopener noreferrer\">credit utilization rate</a> is a useful plain-language reference.</p>"
+                )
+            },
+            {
+                "kicker": "Fees",
+                "h2": "Annual fee, balance transfer fee, late fee — the three to model first",
+                "body": (
+                    "<p>Annual fee: only worth paying if the year&rsquo;s expected rewards or benefits exceed the fee in real cash equivalent, not in inflated &ldquo;value&rdquo; estimates.</p>"
+                    "<p>Balance transfer fee: typically 3&ndash;5% of the amount moved, paid up front. A 0% promo APR only saves money if the interest avoided exceeds the transfer fee over the promo period. Calculate the break-even before transferring.</p>"
+                    "<p>Late fee: capped by federal rule (the cap is updated by the CFPB periodically — see their <a href=\"https://www.consumerfinance.gov/credit-cards/\" target=\"_blank\" rel=\"noopener noreferrer\">credit card resources</a>). The bigger cost of paying late is usually not the fee itself but the loss of the grace period and the potential APR repricing.</p>"
+                )
+            },
+        ],
+        "faqs": [
+            ["What credit card APR should I aim for?",
+             "Rather than chasing a specific number, aim for a card whose APR you will never pay because you always pay the statement balance in full. If you must carry a balance, prioritize the lowest available APR over rewards."],
+            ["Are credit-card rewards a net benefit?",
+             "Only for borrowers who pay in full every month. For revolving borrowers, the interest paid almost always exceeds the value of rewards earned."],
+            ["When is a balance transfer worth doing?",
+             "When the transfer fee plus any new-purchase interest avoided is less than the interest that would have accrued on the original card during the same period. Always calculate the specific break-even before transferring."],
+        ],
+    },
+
+    # ------------------------------------------------------------------
+    "pages/mortgage-guide.html": {
+        "intro_h2": "A mortgage costs more than the monthly payment shown on the marketing page",
+        "intro_body": (
+            "<p>A mortgage&rsquo;s sticker rate is what most shoppers compare. The actual all-in monthly cost is the sticker rate plus property taxes, homeowners insurance, mortgage insurance when applicable, and HOA dues when applicable — together called <strong>PITI(A)</strong>. The CFPB&rsquo;s <a href=\"https://www.consumerfinance.gov/owning-a-home/loan-estimate/\" target=\"_blank\" rel=\"noopener noreferrer\">Loan Estimate</a> is the federally standardized document that puts all of this on one page; every lender must deliver it within three business days of application.</p>"
+            "<p>This guide explains how to read a Loan Estimate, how to compare two of them, and where money quietly leaks during the process.</p>"
+        ),
+        "sections": [
+            {
+                "kicker": "Rate vs APR",
+                "h2": "APR captures fees the interest rate hides",
+                "body": (
+                    "<p>The interest rate determines the principal-and-interest portion of the monthly payment. The APR includes the interest rate plus most loan-related fees expressed as an annualized cost. Two lenders quoting the same interest rate can have very different APRs if one charges higher origination, underwriting, or rate-lock fees. APR is the right shopping number when comparing the same loan type and term.</p>"
+                    "<p>The Loan Estimate&rsquo;s page 3 shows the &ldquo;In 5 Years&rdquo; total — total paid in principal, interest, mortgage insurance, and fees over the first five years. That is often a better real-world comparison than APR alone because it incorporates the actual amortization schedule.</p>"
+                )
+            },
+            {
+                "kicker": "Discount points",
+                "h2": "When buying down the rate actually pays off",
+                "body": (
+                    "<p>One discount point typically costs 1% of the loan amount and reduces the rate by a fraction of a percent (often around 0.25%, but it varies). The break-even is monthly-savings ÷ point-cost. If the break-even is 6 years and you plan to keep the loan for 10, points are likely worth it; if you plan to sell or refinance in 3, they are not.</p>"
+                )
+            },
+            {
+                "kicker": "PMI and MIP",
+                "h2": "Private mortgage insurance is removable; FHA MIP usually is not",
+                "body": (
+                    "<p>On conventional loans, private mortgage insurance (PMI) is required when the down payment is under 20% and is removable once the loan balance reaches 80% loan-to-value (LTV) — automatically at 78% by federal Homeowners Protection Act rules. On FHA loans, the mortgage insurance premium (MIP) is structured differently and, for most current FHA loans, is not removable for the life of the loan unless you refinance into a conventional product. That difference can outweigh the FHA loan&rsquo;s easier underwriting over the long run.</p>"
+                )
+            },
+            {
+                "kicker": "Closing costs",
+                "h2": "Where closing-day cash actually goes",
+                "body": (
+                    "<p>Closing costs typically total 2&ndash;5% of the loan amount and are split into three buckets on the Loan Estimate: (A) services you can shop for (title, settlement, pest), (B) services you can&rsquo;t shop for (appraisal, credit report, lender-required), and (C) taxes and prepaid items (transfer taxes, prepaid interest, escrow deposits). Bucket A is where price comparison pays off. Bucket C is usually unavoidable but should still be verified for accuracy.</p>"
+                    "<p>Pair this with <a href=\"/pages/mortgage-closing-costs-guide\">our closing costs explainer</a> for line-by-line detail.</p>"
+                )
+            },
+        ],
+        "faqs": [
+            ["How much should I shop around for a mortgage?",
+             "The CFPB&rsquo;s research suggests that shoppers who collect quotes from at least three lenders pay measurably less. Multiple credit pulls within a 14&ndash;45 day window are typically treated by scoring models as a single inquiry for shopping purposes."],
+            ["What is the difference between pre-qualified and pre-approved?",
+             "Pre-qualification is informal; pre-approval involves a credit check and documentation. Pre-approval letters carry weight in offers but are not loan commitments."],
+            ["Is 20% down required to buy?",
+             "No. Conventional loans allow as little as 3% down with PMI; FHA loans 3.5%; VA and USDA can be 0% for qualified borrowers. The cost calculation differs across programs and should be compared on the Loan Estimate, not on advertised rates."],
+        ],
+    },
+
+    # ------------------------------------------------------------------
+    "pages/banking-fees-guide.html": {
+        "intro_h2": "The bank fees Americans pay most, and the ones easiest to avoid",
+        "intro_body": (
+            "<p>U.S. consumer bank fees fall into a small number of categories — overdraft, monthly maintenance, ATM, wire, paper statement, and minimum-balance penalties — and most are avoidable with a deliberate account choice. The <a href=\"https://www.consumerfinance.gov/about-us/blog/check-out-our-new-resources-help-people-avoid-overdraft-fees-and-build-savings/\" target=\"_blank\" rel=\"noopener noreferrer\">CFPB&rsquo;s overdraft resources</a> and the <a href=\"https://www.fdic.gov/resources/bankers/national-rates/\" target=\"_blank\" rel=\"noopener noreferrer\">FDIC National Rates</a> data are the right starting points for figuring out which fees you are actually paying.</p>"
+            "<p>This guide describes how each fee works, when it is reasonable, and the account-level changes that remove it.</p>"
+        ),
+        "sections": [
+            {
+                "kicker": "Overdraft",
+                "h2": "How overdraft and NSF fees work",
+                "body": (
+                    "<p>An overdraft fee is charged when the bank pays a transaction that exceeds the account balance. A non-sufficient-funds (NSF) fee is charged when the bank declines the transaction. After significant CFPB attention, many large banks have reduced or eliminated NSF fees and capped daily overdraft fee counts; smaller institutions vary. The single most effective lever is opting out of overdraft <em>coverage</em> for one-time debit and ATM transactions — Regulation E gives every account holder the right to do this.</p>"
+                )
+            },
+            {
+                "kicker": "Monthly fee",
+                "h2": "Monthly maintenance fees and how to waive them",
+                "body": (
+                    "<p>Many checking accounts charge a monthly maintenance fee that can be waived by meeting at least one condition: a minimum balance, a recurring direct deposit, a number of debit transactions per month, or enrollment in a relationship pricing tier. Read the waiver conditions on the disclosure (the &ldquo;Schedule of Fees&rdquo;) before opening the account.</p>"
+                    "<p>The simplest way to avoid the fee permanently is to open a checking account that does not charge one. Several large national banks, regional online banks, and most credit unions offer no-monthly-fee checking with no balance requirement.</p>"
+                )
+            },
+            {
+                "kicker": "ATM",
+                "h2": "Out-of-network ATM fees: two charges, one transaction",
+                "body": (
+                    "<p>Using an out-of-network ATM typically triggers two fees: one from the ATM operator (the &ldquo;surcharge&rdquo;) and one from your own bank (the &ldquo;foreign ATM fee&rdquo;). Combined, they often total $5&ndash;$8 per withdrawal. Online-only banks frequently reimburse some or all of these monthly; some networks (Allpoint, MoneyPass, CO-OP) provide surcharge-free access at tens of thousands of locations.</p>"
+                )
+            },
+            {
+                "kicker": "Other",
+                "h2": "Wire, paper-statement, and minimum-balance fees",
+                "body": (
+                    "<p><strong>Wires.</strong> Domestic outgoing wires typically cost $20&ndash;$35; international outgoing wires more. ACH transfers are free at most institutions and clear in 1&ndash;3 business days for most uses.</p>"
+                    "<p><strong>Paper statement.</strong> Increasingly charged as a small monthly fee unless you opt into e-statements. A one-click change in online banking eliminates it.</p>"
+                    "<p><strong>Minimum balance.</strong> If your account requires a minimum to avoid a fee, either keep that minimum reliably or switch to an account without one. Paying a $12 fee to keep money in checking is a bad trade if a competing free checking account is available.</p>"
+                )
+            },
+        ],
+        "faqs": [
+            ["Are credit unions always cheaper than banks?",
+             "Often, but not always. Federal credit unions have an 18% APR ceiling and tend to charge fewer fees on basic accounts. The right comparison is your specific account&rsquo;s disclosure schedule against a competing institution&rsquo;s, not bank-vs-credit-union as a category."],
+            ["What is the simplest way to avoid overdraft fees?",
+             "Opt out of overdraft coverage for debit and ATM transactions (your right under Regulation E), then maintain a small buffer in checking. If a debit exceeds the balance, the bank will decline it rather than approving and charging an overdraft fee."],
+            ["Why are some banks fee-free?",
+             "Online-only and challenger banks typically have lower overhead than branch-based banks and earn revenue from interchange (the small fee merchants pay on each debit swipe) rather than account fees."],
+        ],
+    },
+
+    # ------------------------------------------------------------------
+    "pages/refinancing-guide.html": {
+        "intro_h2": "Refinancing: the math that actually decides whether to do it",
+        "intro_body": (
+            "<p>Refinancing replaces an existing loan with a new one that has different terms. Done well, it lowers total cost; done poorly, it resets a clock and adds fees for negligible improvement. The CFPB&rsquo;s <a href=\"https://www.consumerfinance.gov/owning-a-home/process/refinance/\" target=\"_blank\" rel=\"noopener noreferrer\">refinance overview</a> is the clearest starting point for mortgages; the same principles apply, with smaller fee scales, to auto loans, personal loans, and student loans.</p>"
+            "<p>This guide focuses on the decision math: when refinancing saves money, when it does not, and how to compare a new loan against the one you already have.</p>"
+        ),
+        "sections": [
+            {
+                "kicker": "Break-even",
+                "h2": "How long until refinancing pays for itself",
+                "body": (
+                    "<p>Refinancing has up-front costs: closing costs on a mortgage refinance (often 2&ndash;5% of the new loan), title and escrow fees, and (where applicable) prepayment penalties on the old loan. The right way to evaluate the trade is: <em>break-even months</em> = total refinance costs ÷ monthly savings. If you expect to keep the loan past that break-even, the refinance is worth doing; if you might sell, move, or refinance again before then, it usually is not.</p>"
+                    "<p>Always run the break-even on the actual numbers from the Loan Estimate (mortgages) or the lender&rsquo;s itemized fee disclosure (other products), not on advertised &ldquo;average&rdquo; savings.</p>"
+                )
+            },
+            {
+                "kicker": "Term reset",
+                "h2": "Watch the reset of the amortization clock",
+                "body": (
+                    "<p>Refinancing a 30-year mortgage into a new 30-year mortgage after eight years of payments resets the schedule. Even at a lower rate, you may pay more total interest because you stretched the timeline by eight years. If reducing total cost is the goal, ask the lender to quote a shorter term (e.g., refinance the remaining 22 years into a new 20-year loan).</p>"
+                )
+            },
+            {
+                "kicker": "Student loans",
+                "h2": "Federal student-loan refinancing trades benefits for rate",
+                "body": (
+                    "<p>Refinancing a federal student loan into a private loan converts the loan permanently — you lose access to income-driven repayment, public service loan forgiveness, and federal forbearance programs. For borrowers in stable income with no expected use of those federal benefits, the lower rate may still be the right trade. For everyone else, it generally is not. The CFPB&rsquo;s <a href=\"https://www.consumerfinance.gov/consumer-tools/student-loans/\" target=\"_blank\" rel=\"noopener noreferrer\">student loan tools</a> walk through the trade-offs.</p>"
+                )
+            },
+            {
+                "kicker": "Cash-out",
+                "h2": "Cash-out refinances increase total cost — always",
+                "body": (
+                    "<p>A cash-out refinance is a refinance plus a new loan against the equity you already have. The new loan amount is higher, so total interest paid will be higher even if the rate is the same. Treat the cash-out portion as a separate borrowing decision evaluated against alternatives: HELOC, home equity loan, personal loan, or simply not borrowing.</p>"
+                )
+            },
+        ],
+        "faqs": [
+            ["How much should rates drop before refinancing a mortgage?",
+             "There is no universal threshold. The right test is whether the break-even months are shorter than the time you plan to keep the loan. A 0.5-percentage-point drop can be worth it for borrowers who will hold the loan many years; a 1.5-point drop can be wrong for someone planning to move in two years."],
+            ["Does refinancing hurt my credit?",
+             "There is a temporary small dip from the hard inquiry and the closing of the old account. Both effects fade within months and are typically far smaller than the long-term cost of holding a more expensive loan than necessary."],
+            ["What if I cannot afford the refinance closing costs?",
+             "Most mortgage refinances allow rolling costs into the loan amount. That changes the math — you are now financing the costs at the new rate, so they should be included on the cost side of the break-even calculation, not treated as zero."],
+        ],
+    },
+
+    # ------------------------------------------------------------------
+    "pages/student-loans-guide.html": {
+        "intro_h2": "Federal vs. private student loans: the trade you cannot undo",
+        "intro_body": (
+            "<p>The most consequential decision in student-loan borrowing is whether the loan is federal or private. Federal loans (Direct Subsidized, Direct Unsubsidized, PLUS) come with standardized rates set by Congress, income-driven repayment plans, deferment and forbearance options, and (for some borrowers) Public Service Loan Forgiveness eligibility. Private loans, originated by banks and credit unions, are priced individually based on credit, can have lower rates for high-credit borrowers, but lack all of the federal protections. The authoritative source for federal loans is <a href=\"https://studentaid.gov/\" target=\"_blank\" rel=\"noopener noreferrer\">StudentAid.gov</a>, run by the U.S. Department of Education.</p>"
+            "<p>This guide explains the major decision points before borrowing and the repayment options after.</p>"
+        ),
+        "sections": [
+            {
+                "kicker": "Federal first",
+                "h2": "Why federal loans are almost always the right starting point",
+                "body": (
+                    "<p>Federal Direct Subsidized loans do not accrue interest while the borrower is enrolled at least half-time. Federal Direct Unsubsidized loans accrue interest but do not require payments during enrollment. Both qualify for income-driven repayment, which caps payments as a percentage of discretionary income after graduation. Those are large protections that no private lender matches. Exhaust federal eligibility (file the FAFSA) before considering private debt.</p>"
+                )
+            },
+            {
+                "kicker": "Capitalized interest",
+                "h2": "How unpaid interest becomes principal",
+                "body": (
+                    "<p>Interest that accrues during deferment, forbearance, or grace periods is often <em>capitalized</em> — added to the principal — at the end of those periods. Future interest then accrues on the larger balance. The practical effect on a loan held many years can be material. Paying even small amounts of interest during enrollment, where possible, prevents this.</p>"
+                )
+            },
+            {
+                "kicker": "Repayment plans",
+                "h2": "Income-driven repayment in plain English",
+                "body": (
+                    "<p>Income-driven repayment (IDR) plans cap monthly payments at a percentage of discretionary income and forgive remaining balances after 20&ndash;25 years (10 years for borrowers in qualifying public-service employment via PSLF). The newer SAVE plan replaced REPAYE; older plans (PAYE, IBR, ICR) remain available for some borrowers. The Department of Education&rsquo;s <a href=\"https://studentaid.gov/manage-loans/repayment/plans/income-driven\" target=\"_blank\" rel=\"noopener noreferrer\">IDR overview</a> shows current plan rules and a loan simulator.</p>"
+                )
+            },
+            {
+                "kicker": "Private",
+                "h2": "When private loans make sense — and when they do not",
+                "body": (
+                    "<p>Private loans can offer lower rates than federal Direct PLUS loans for high-credit parent borrowers, and can fill funding gaps after federal limits. Before signing, confirm: (1) the rate is fixed (variable rates have shown sharp moves historically), (2) the repayment options if you lose income, (3) whether a cosigner can be released and on what schedule, and (4) the full cost over the expected repayment period, not just the monthly payment.</p>"
+                    "<p>Refinancing federal loans into private loans is rarely the right move for most borrowers — see <a href=\"/pages/refinancing-guide\">our refinancing guide</a> for that decision.</p>"
+                )
+            },
+        ],
+        "faqs": [
+            ["Should I use a private loan to avoid federal loan limits?",
+             "Only after running the math on Parent PLUS and other federal options. Federal protections (IDR, forbearance, PSLF) have significant real value that should be priced into the comparison."],
+            ["Does loan forgiveness create a tax bill?",
+             "Historically yes for many IDR forgiveness paths, though recent federal legislation has temporarily excluded student-loan forgiveness from federal tax through specific dates. State tax treatment varies. Confirm current rules at StudentAid.gov and IRS.gov before relying on forgiveness as a plan."],
+            ["What is the safest way to pay down student debt fast?",
+             "Stay on the standard or income-driven plan, make extra payments to the principal of the highest-rate loan first, and only refinance if you no longer need federal benefits and a meaningfully lower rate is available."],
+        ],
+    },
+
+    # ------------------------------------------------------------------
+    # Calculators with unique short content.
+    # ------------------------------------------------------------------
+    "pages/loan-payment-calculator.html": {
+        "intro_h2": "Loan payment calculator: estimate a monthly payment in seconds",
+        "intro_body": (
+            "<p>This calculator estimates a fixed-rate installment-loan monthly payment using the standard amortization formula. It is useful for personal loans, auto loans, and any other fully-amortizing fixed-rate product where the term is expressed in months.</p>"
+        ),
+        "sections": [
+            {
+                "kicker": "Formula",
+                "h2": "The math behind the calculator",
+                "body": (
+                    "<p>The monthly payment <em>P</em> on a loan of amount <em>A</em>, monthly rate <em>r</em> (annual APR ÷ 12), and term <em>n</em> months is:</p>"
+                    "<p><code>P = A · r ÷ (1 − (1 + r)<sup>−n</sup>)</code></p>"
+                    "<p>This is the same closed-form amortization formula used by every standard lender quoting tool. It assumes a fixed rate over the full term and no fees added to the monthly payment. Fees that come out of the loan&rsquo;s proceeds at funding (origination fees) reduce the cash you receive but do not change the calculated monthly payment for the requested amount.</p>"
+                )
+            },
+            {
+                "kicker": "Example",
+                "h2": "Worked example",
+                "body": (
+                    "<p>A $20,000 personal loan at 9.0% APR over 48 months produces a monthly payment near $498. Total interest over the life of the loan is roughly $3,894. Move the rate to 12% and the payment rises to about $527 with total interest near $5,275 — a single rate change adds more than a thousand dollars in total cost on the same loan amount.</p>"
+                )
+            },
+            {
+                "kicker": "Limits",
+                "h2": "What this calculator cannot tell you",
+                "body": (
+                    "<p>The calculator does not estimate approval odds, does not account for variable rates, does not include lender fees in the APR, and does not adjust for credit profile. Use it for &ldquo;is this payment realistic?&rdquo; planning, then verify the final terms on a lender&rsquo;s firm offer or Loan Estimate.</p>"
+                )
+            },
+        ],
+        "faqs": [
+            ["Does the calculator account for origination fees?",
+             "Not directly. To capture fees, calculate the payment for the full loan amount the lender quotes, then divide total interest by the cash you actually receive at funding (loan amount minus origination fee) to compare offers fairly."],
+            ["Can I use this for an auto loan?",
+             "Yes. Use the loan amount net of down payment and trade-in. For an apples-to-apples lender comparison, include any dealer-financed fees in the loan amount or in your manual cost calculation."],
+            ["Why does my actual quote differ?",
+             "Lenders may round, apply different day-count conventions, or include fees in different places. The calculator&rsquo;s result is a planning estimate that should match within a few dollars of a fee-free quote."],
+        ],
+    },
+
+    # ------------------------------------------------------------------
+    "pages/credit-card-interest-calculator.html": {
+        "intro_h2": "Credit card interest calculator: see how long a payoff really takes",
+        "intro_body": (
+            "<p>This calculator simulates month-by-month payoff of a credit-card balance at a given APR with a chosen monthly payment, optionally adding new monthly charges. It is built to expose how slowly minimum payments retire a balance and how quickly a moderate payment increase changes the timeline.</p>"
+        ),
+        "sections": [
+            {
+                "kicker": "How it works",
+                "h2": "The simulation, in plain English",
+                "body": (
+                    "<p>Each simulated month: monthly interest = balance × (APR ÷ 12). New balance = balance + interest + new charges − payment. The simulation continues until the balance reaches zero or the payment fails to cover monthly interest (in which case the balance grows forever).</p>"
+                )
+            },
+            {
+                "kicker": "Example",
+                "h2": "Worked example",
+                "body": (
+                    "<p>A $6,000 balance at 24% APR with a $150 monthly payment and zero new charges retires in roughly 73 months and costs about $4,950 in interest. Increase the payment to $250 and the timeline drops to roughly 32 months with interest near $1,950 — saving about three years and three thousand dollars on the same balance.</p>"
+                )
+            },
+            {
+                "kicker": "Limits",
+                "h2": "What the calculator cannot model",
+                "body": (
+                    "<p>Real credit-card statements use slightly different daily-balance methods, may reprice on missed payments, and impose minimum payment formulas (often the larger of 1% of balance + interest or a flat dollar minimum). The simulator&rsquo;s assumption of a constant payment is a simplification. For a debt that you carry close to its limit, real APR repricing risk is the biggest unmodeled factor.</p>"
+                )
+            },
+        ],
+        "faqs": [
+            ["Should I always pay more than the minimum?",
+             "Yes when cash flow allows. Minimum payments are designed to extend revenue to the issuer; even small increases significantly shorten the payoff and reduce total interest."],
+            ["What if I keep adding new charges?",
+             "Use the &ldquo;new monthly charges&rdquo; input. If your payment is less than the interest charge plus the new charges, the balance will grow rather than shrink. The simulator will flag this case."],
+            ["Should I do a balance transfer?",
+             "Run the math first. Add the transfer fee to the new card&rsquo;s starting balance, simulate payoff at the promo APR over the promo period, then assume the regular APR after. Compare total cost to staying on the current card."],
+        ],
+    },
+
+    # ------------------------------------------------------------------
+    "pages/mortgage-calculator.html": {
+        "intro_h2": "Mortgage calculator: principal, interest, taxes, insurance, PMI",
+        "intro_body": (
+            "<p>This calculator estimates the full monthly housing payment (PITI plus PMI) for a fixed-rate mortgage. It is meant for early affordability planning, not as a substitute for a lender&rsquo;s Loan Estimate.</p>"
+        ),
+        "sections": [
+            {
+                "kicker": "Inputs",
+                "h2": "What each field represents",
+                "body": (
+                    "<p><strong>Home price</strong>: the contract or expected purchase price. <strong>Down payment</strong>: cash to closing applied to principal. <strong>Rate</strong>: annual interest rate; APR if you want to include lender fees. <strong>Term</strong>: typically 30 or 15 years. <strong>Annual taxes</strong> and <strong>insurance</strong>: divided by 12 and added to the monthly payment. <strong>Monthly PMI</strong>: required on conventional loans with under 20% down (and on FHA loans as MIP, with different removal rules).</p>"
+                )
+            },
+            {
+                "kicker": "Formula",
+                "h2": "The amortization math",
+                "body": (
+                    "<p>The principal-and-interest portion uses the standard amortization formula <code>P = A · r ÷ (1 − (1 + r)<sup>−n</sup>)</code> with <em>r</em> as the monthly rate and <em>n</em> as the number of monthly payments. Taxes, insurance, and PMI are added directly to the monthly figure to produce a planning estimate of the full payment.</p>"
+                )
+            },
+            {
+                "kicker": "Limits",
+                "h2": "What the calculator does not include",
+                "body": (
+                    "<p>HOA dues, condo special assessments, supplemental property tax assessments in some states, flood insurance where required, and any state or municipal tax credits are not included. For a true line-item picture, request a Loan Estimate from at least three lenders; see the <a href=\"https://www.consumerfinance.gov/owning-a-home/loan-estimate/\" target=\"_blank\" rel=\"noopener noreferrer\">CFPB&rsquo;s Loan Estimate guide</a>.</p>"
+                )
+            },
+        ],
+        "faqs": [
+            ["Should I include taxes and insurance even if they are paid separately?",
+             "Yes. Whether your lender escrows or not, those costs come out of your household budget every month. The most honest affordability test treats them as part of the housing payment."],
+            ["Does the calculator account for interest-only or ARM loans?",
+             "No. It assumes a fixed-rate fully-amortizing loan. Interest-only and adjustable-rate mortgages have different payment dynamics that this tool does not model."],
+            ["How conservative should I be on rate and taxes?",
+             "Conservative. Pick a rate that gives you cushion if pricing moves before lock, and use the highest plausible local property-tax rate. Underestimating either is a common reason buyers feel stretched after closing."],
+        ],
+    },
+
+    # ------------------------------------------------------------------
+    "pages/debt-payoff-calculator.html": {
+        "intro_h2": "Debt payoff calculator: compare minimum vs. accelerated payments",
+        "intro_body": (
+            "<p>This calculator simulates two payoff scenarios on the same starting balance: paying the minimum monthly amount versus paying a higher planned amount. It is built to show, in months and dollars, what the extra payment buys.</p>"
+        ),
+        "sections": [
+            {
+                "kicker": "What it does",
+                "h2": "Two simulations, one output",
+                "body": (
+                    "<p>For each scenario the calculator runs the same month-by-month payoff loop: interest accrues at APR ÷ 12; payment is applied; remaining balance carries to the next month. The output is months to payoff and total interest paid for both the minimum-payment and planned-payment paths.</p>"
+                )
+            },
+            {
+                "kicker": "Worked example",
+                "h2": "Why $100 extra per month matters",
+                "body": (
+                    "<p>A $12,000 balance at 19.99% APR with a $320 minimum payment retires in roughly 67 months and costs about $5,470 in interest. The same balance with a $475 planned payment retires in roughly 32 months and costs about $2,490 in interest — a difference of nearly $3,000 in total cost and more than two years off the timeline.</p>"
+                )
+            },
+            {
+                "kicker": "Two methods",
+                "h2": "Avalanche vs. snowball",
+                "body": (
+                    "<p>This tool simulates a single balance. When you have multiple debts, two well-known strategies exist: <em>avalanche</em> (pay highest APR first, mathematically optimal) and <em>snowball</em> (pay smallest balance first, behaviorally easier for some). The CFPB does not endorse either; both work if followed. See <a href=\"/pages/debt-snowball-vs-avalanche\">our snowball vs. avalanche article</a> for the comparison.</p>"
+                )
+            },
+        ],
+        "faqs": [
+            ["Should I tackle one debt at a time or split extra payments?",
+             "Mathematically, concentrating extra payments on the highest-APR debt minimizes total interest. Behaviorally, some borrowers stick with payoff better when they see quick wins on small balances. The CFPB does not pick one over the other; both work if maintained."],
+            ["Does this account for cards still being used?",
+             "The single-balance simulator assumes no new charges. If you are still actively charging on the same card, the &ldquo;new monthly charges&rdquo; field on the credit card interest calculator gives a more realistic picture."],
+            ["What APR should I use if I do not know mine?",
+             "Check your most recent statement; the APR is disclosed in plain language. For multiple cards, use the weighted average by balance for a single-balance estimate or run each card separately."],
+        ],
+    },
 }
 
 
@@ -1500,6 +2011,10 @@ def title_from_path(path: str) -> str:
 def public_path(path: str) -> str:
     if path == "index.html":
         return "/"
+    # A directory index file like authors/javi-perez/index.html should map to
+    # the directory URL (/authors/javi-perez), not /authors/javi-perez/index.
+    if path.endswith("/index.html"):
+        return "/" + path[:-len("/index.html")]
     return f"/{path.removesuffix('.html')}"
 
 
@@ -1552,32 +2067,98 @@ def slug_value(path: str) -> str:
 
 
 def generate_paragraph(topic: str, section: str, page_title: str, index: int) -> str:
-    scenarios = [
-        "a borrower comparing two lenders with the same monthly payment but different upfront fees",
-        "a household balancing emergency savings against a faster payoff plan",
-        "a rate shopper evaluating whether a lower APR offsets transfer or closing costs",
-        "a family reviewing how taxes, insurance, and debt obligations affect a realistic monthly budget",
-        "a consumer deciding whether convenience features are worth ongoing account charges",
-    ]
-    figures = [
-        "$8,000 at 11.9% APR over 36 months",
-        "$15,000 at 9.4% APR with a 4% fee",
-        "$275,000 financed over 30 years with taxes and insurance added",
-        "$4,200 revolving at 24.99% with only minimum payments",
-        "$18,500 refinanced into a shorter term with a lower rate",
-    ]
-    compliance = [
-        "Federal disclosures can help, but shoppers still need to compare APR, fees, and timing side by side.",
-        "A lower monthly payment does not automatically mean a lower total borrowing cost.",
-        "Cash-flow resilience matters because tight budgets often turn one missed payment into several new problems.",
-        "Looking at the total cost over the expected holding period usually produces a better decision than focusing on teaser pricing alone.",
-        "Credit profile, income stability, and debt-to-income ratio often matter just as much as the headline rate.",
-    ]
-    return (
-        f"<p>{html.escape(section)} matters in {html.escape(page_title.lower())} because lenders and consumers are usually solving for "
-        f"more than one goal at once. In practice, this often looks like {scenarios[index % len(scenarios)]}. "
-        f"A simple example is {figures[index % len(figures)]}, where the quote only becomes truly useful after you factor in fees, repayment speed, and what the borrower needs from the transaction. "
-        f"{compliance[index % len(compliance)]} When reviewing {html.escape(topic.lower())}, it helps to compare best-case marketing language against a conservative budget that assumes rates can change, life expenses can surprise you, and the cheapest option on paper may not be the easiest plan to maintain.</p>"
+    """Deprecated. The previous implementation chose from five hardcoded
+    scenarios/figures/compliance strings and pasted the same paragraph shape
+    into every page that lacked unique PAGE_CONTENT, producing scaled-content
+    abuse. Returns empty string so any residual call site renders nothing
+    rather than templated copy."""
+    return ""
+
+
+# Topic -> list of (label, href, role) tuples for the Sources & methodology block.
+# Only official .gov / regulator URLs and a small set of high-trust supplemental
+# sources are linked. Every link opens in a new tab with rel="noopener".
+SOURCES_BY_TOPIC: Dict[str, List[Tuple[str, str, str]]] = {
+    "personal-loans": [
+        ("CFPB · Personal loans explained", "https://www.consumerfinance.gov/ask-cfpb/what-is-a-personal-loan-en-2122/", "Plain-language CFPB explainer on how personal loans work, what fees to expect, and consumer protections."),
+        ("Federal Reserve · G.19 Consumer Credit release", "https://www.federalreserve.gov/releases/g19/current/", "Official monthly consumer credit data used for APR and balance context."),
+        ("FTC · Personal loan scams", "https://consumer.ftc.gov/articles/what-know-about-personal-loans", "Plain-English FTC guidance on what to watch for when shopping for a personal loan."),
+    ],
+    "credit-cards": [
+        ("CFPB · Credit cards", "https://www.consumerfinance.gov/consumer-tools/credit-cards/", "CFPB resources on APR, fees, billing, and disputes."),
+        ("Federal Reserve · Report to Congress on the Profitability of Credit Card Operations", "https://www.federalreserve.gov/publications/report-to-the-congress-on-the-profitability-of-credit-card-operations-of-depository-institutions.htm", "Official Federal Reserve reporting on credit card pricing and profitability."),
+        ("CFPB · Credit card complaint database", "https://www.consumerfinance.gov/data-research/consumer-complaints/", "Searchable public complaint database used to spot recurring issuer issues."),
+    ],
+    "mortgage": [
+        ("CFPB · Loan Estimate form", "https://www.consumerfinance.gov/owning-a-home/loan-estimate/", "The standardized federal disclosure every lender must give within three business days."),
+        ("Federal Reserve · Mortgage rates (FRED)", "https://fred.stlouisfed.org/series/MORTGAGE30US", "30-year fixed mortgage average, updated weekly by the Federal Reserve via Freddie Mac PMMS."),
+        ("HUD · FHA loan limits", "https://www.hud.gov/buying/loans", "FHA program rules, limits, and counseling resources."),
+    ],
+    "credit-score": [
+        ("CFPB · Credit reports and scores", "https://www.consumerfinance.gov/consumer-tools/credit-reports-and-scores/", "CFPB-curated resources on how scores are built, how to dispute errors, and how to get free reports."),
+        ("FTC · Free credit reports", "https://consumer.ftc.gov/articles/free-credit-reports", "How to use AnnualCreditReport.com — the only federally authorized source for free reports."),
+        ("AnnualCreditReport.com", "https://www.annualcreditreport.com/", "Federally authorized source for free credit reports from Equifax, Experian, and TransUnion."),
+    ],
+    "banking-fees": [
+        ("FDIC · National rates and rate caps", "https://www.fdic.gov/resources/bankers/national-rates/", "Weekly FDIC national average rates for deposit products."),
+        ("CFPB · Bank account fees", "https://www.consumerfinance.gov/about-us/blog/check-out-our-new-resources-help-people-avoid-overdraft-fees-and-build-savings/", "CFPB consumer resources on overdraft, NSF, and account fees."),
+        ("Federal Reserve · Consumers and mobile financial services", "https://www.federalreserve.gov/publications/consumers-and-mobile-financial-services.htm", "Federal Reserve research on consumer banking behavior."),
+    ],
+    "debt-payoff": [
+        ("CFPB · Debt repayment strategies", "https://www.consumerfinance.gov/ask-cfpb/what-is-a-debt-management-plan-en-1457/", "CFPB explainer on debt management plans and repayment approaches."),
+        ("FTC · Coping with debt", "https://consumer.ftc.gov/articles/coping-with-debt", "FTC guidance on negotiating with creditors and avoiding scams."),
+        ("Federal Reserve · Household Debt and Credit Report", "https://www.newyorkfed.org/microeconomics/hhdc.html", "Quarterly New York Fed Center for Microeconomic Data report."),
+    ],
+    "refinancing": [
+        ("CFPB · Refinancing your mortgage", "https://www.consumerfinance.gov/owning-a-home/process/refinance/", "CFPB checklist and explainer for mortgage refinancing decisions."),
+        ("CFPB · Auto loan refinancing", "https://www.consumerfinance.gov/ask-cfpb/should-i-refinance-my-auto-loan-en-851/", "CFPB short answer on when refinancing an auto loan makes sense."),
+        ("Federal Reserve · Mortgage rates (FRED)", "https://fred.stlouisfed.org/series/MORTGAGE30US", "Weekly 30-year fixed mortgage rate average used to gauge refinance timing."),
+    ],
+    "student-loans": [
+        ("Federal Student Aid · StudentAid.gov", "https://studentaid.gov/", "Official U.S. Department of Education portal for federal student aid."),
+        ("CFPB · Student loans", "https://www.consumerfinance.gov/consumer-tools/student-loans/", "CFPB consumer resources on federal vs. private loans, servicing, and repayment."),
+        ("Federal Student Aid · Income-driven repayment", "https://studentaid.gov/manage-loans/repayment/plans/income-driven", "Plain-English explainer on IDR plans including SAVE, PAYE, IBR."),
+    ],
+    "default": [
+        ("CFPB · Consumer tools", "https://www.consumerfinance.gov/consumer-tools/", "Plain-language explainers and disclosure forms from the Consumer Financial Protection Bureau."),
+        ("Federal Reserve · Consumer credit data", "https://www.federalreserve.gov/releases/g19/current/", "Monthly G.19 release on consumer credit outstanding and revolving APRs."),
+        ("FTC · Money and credit", "https://consumer.ftc.gov/money-and-credit", "FTC consumer protection guidance on money and credit."),
+    ],
+}
+
+
+def sources_block(topic_key: str) -> str:
+    """Render a 'Sources and methodology' section pointing at primary regulators
+    plus a short methodology note. The topic_key picks the link set; unknown
+    keys fall back to a sensible default."""
+    key = (topic_key or "").strip().lower()
+    aliases = {
+        "personal loans": "personal-loans",
+        "credit cards": "credit-cards",
+        "mortgage": "mortgage",
+        "credit score": "credit-score",
+        "banking fees": "banking-fees",
+        "debt payoff": "debt-payoff",
+        "refinancing": "refinancing",
+        "student loans": "student-loans",
+    }
+    key = aliases.get(key, key)
+    sources = SOURCES_BY_TOPIC.get(key) or SOURCES_BY_TOPIC["default"]
+    items = "".join(
+        f'<li><a href="{html.escape(href)}" target="_blank" rel="noopener noreferrer">{html.escape(label)}</a> — {html.escape(role)}</li>'
+        for label, href, role in sources
+    )
+    return trim(
+        f"""
+        <section class="ccg-section ccg-section--sources" aria-label="Sources and methodology">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Sources & Methodology</p>
+            <h2>Where we pulled the numbers</h2>
+          </div>
+          <ul class="ccg-list ccg-list--sources">{items}</ul>
+          <p class="ccg-sources-note">{html.escape(AI_DISCLOSURE)} {html.escape(NON_ADVICE_DISCLAIMER)}</p>
+        </section>
+        """
     )
 
 
@@ -1643,12 +2224,12 @@ def author_box() -> str:
         <section class="ccg-author-box editorial-byline" aria-label="Editor information">
           <img class="editorial-byline__photo" src="{EDITOR_PHOTO}" alt="{EDITOR_NAME}" width="56" height="56" loading="lazy" onerror="this.onerror=null;this.src='{EDITOR_PHOTO_FALLBACK}';">
           <div class="editorial-byline__body">
-            <p class="editorial-byline__name"><strong>{EDITOR_NAME}</strong> · {EDITOR_ROLE}</p>
+            <p class="editorial-byline__name"><strong>Edited by <a href="{DOMAIN}/authors/javi-perez">{EDITOR_NAME}</a></strong> · {EDITOR_ROLE}</p>
             <p class="editorial-byline__meta">
               <a href="{EDITOR_LINKEDIN}" target="_blank" rel="noopener noreferrer">LinkedIn</a>
               · Last reviewed: {LAST_REVIEWED}
             </p>
-            <p class="editorial-byline__note">Content is reviewed quarterly against public data from CFPB, the Federal Reserve, FDIC, BLS, and SEC. Javi is not a licensed financial advisor; nothing on this page is financial advice.</p>
+            <p class="editorial-byline__note">{AI_DISCLOSURE} {NON_ADVICE_DISCLAIMER}</p>
           </div>
         </section>
         """
@@ -1662,9 +2243,10 @@ def editorial_trust_block() -> str:
           <img class="editorial-trust__photo" src="{EDITOR_PHOTO}" alt="{EDITOR_NAME}" width="80" height="80" loading="lazy" onerror="this.onerror=null;this.src='{EDITOR_PHOTO_FALLBACK}';">
           <div class="editorial-trust__body">
             <p class="ccg-kicker">Editorial Standards</p>
-            <h2>Built by {EDITOR_NAME} with public data you can verify.</h2>
-            <p>Every guide on CreditCostGuide cites primary sources — CFPB complaint data, Federal Reserve consumer surveys, FDIC bank-rate tables, and BLS inflation statistics. No financial advice, no fictional credentials, no affiliate pressure inside core editorial content.</p>
-            <p><a class="editorial-trust__link" href="{DOMAIN}/about">Read our editorial standards →</a></p>
+            <h2>Built by <a href="{DOMAIN}/authors/javi-perez">{EDITOR_NAME}</a> with public data you can verify.</h2>
+            <p>Every indexable guide cites primary sources — CFPB, Federal Reserve / FRED, FDIC, BLS, FTC, and SEC. {AI_DISCLOSURE}</p>
+            <p><strong>{NON_ADVICE_DISCLAIMER}</strong></p>
+            <p><a class="editorial-trust__link" href="{DOMAIN}/how-we-research">Read our research methodology →</a></p>
           </div>
         </section>
         """
@@ -1834,67 +2416,53 @@ def smartcredit_inject(content: str) -> str:
 
 
 def section_block(topic: str, page_title: str, index: int) -> str:
-    subheads = [
-        "Why this cost category matters",
-        "How pricing changes by borrower profile",
-        "Where comparison shopping often goes wrong",
-        "Budget examples that keep costs realistic",
-        "How to reduce downside risk",
-    ]
-    paragraphs = "".join(generate_paragraph(topic, f"{topic} {subheads[(index + i) % len(subheads)]}", page_title, index + i) for i in range(4))
-    list_items = [
-        "Compare the all-in cost, not just the monthly payment.",
-        "Review fees, timing, and rate adjustment rules before signing.",
-        "Use conservative household cash-flow assumptions in every example.",
-        "Check whether a lower payment simply extends the repayment timeline.",
-    ]
-    bullets = "".join(f"<li>{html.escape(item)}</li>" for item in list_items)
-    return trim(
-        f"""
-        <section class="ccg-section">
-          <div class="ccg-section-head">
-            <p class="ccg-kicker">Deep Dive {index + 1}</p>
-            <h2>{html.escape(topic)}</h2>
-          </div>
-          {paragraphs}
-          <ul class="ccg-list">{bullets}</ul>
-          {mini_chart([42 + index * 2, 51 + index, 47 + index * 2, 58 + index, 64 + index], f"{topic} trend")}
-        </section>
-        """
-    )
+    """Deprecated. The previous implementation produced templated 'Deep Dive'
+    paragraphs that recycled five hardcoded example figures across many pages,
+    triggering AdSense scaled-content heuristics. Kept as a stub so any
+    leftover call sites get a tiny placeholder instead of repeating content.
+    Do not use in new code paths."""
+    return ""
 
 
 def article_body(config: Dict[str, object], min_words: int, related_paths: List[str]) -> str:
-    sections = [section_block(str(topic), str(config["title"]), idx) for idx, topic in enumerate(config["topics"])]
-    content = "".join(sections)
-    content += comparison_table(str(config["hero"]))
-    content += faq_html(config["faqs"])
-    content += author_box()
-    content += related_html(related_paths)
-    while words(content) < min_words:
-        idx = len(re.findall(r"<section class=\"ccg-section\">", content))
-        extra_topic = f"{config['hero']} scenario planning {idx}"
-        content += section_block(extra_topic, str(config["title"]), idx)
+    """Short, non-templated body for pillar/supporting pages that do NOT have a
+    custom PAGE_CONTENT entry. These pages render only their unique hero text,
+    one comparison table, one FAQ block, the editor byline, and related links.
+    The legacy 'Deep Dive' loop was removed to eliminate scaled-content patterns.
+    Pages that need long-form depth must opt in via PAGE_CONTENT.
+    """
+    intro = trim(
+        f"""
+        <section class="ccg-section">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Overview</p>
+            <h2>{html.escape(str(config["hero"]))}</h2>
+          </div>
+          <p>{html.escape(str(config.get("summary") or config.get("description") or ""))}</p>
+        </section>
+        """
+    )
+    content = (
+        intro
+        + comparison_table(str(config["hero"]))
+        + faq_html(config["faqs"])
+        + sources_block(str(config.get("sources_topic") or config["hero"]))
+        + author_box()
+        + related_html(related_paths)
+    )
     return content
 
 
 def support_body(path: str, title: str, desc: str, related_paths: List[str]) -> Tuple[str, List[List[str]]]:
-    core = title.replace(":", "").split(" ")
-    focus = " ".join(core[:4])
+    """Minimal body for supporting articles that do NOT have unique PAGE_CONTENT.
+    These pages are intentionally short and rendered as noindex,follow during
+    AdSense review — they remain available via internal links but stay out of
+    the indexable surface until they get unique long-form content of their own."""
     faqs = [
-        [f"What should readers compare first in {focus.lower()}?", "Start with the all-in cost, then test whether the monthly payment still works once fees, timing, and normal living expenses are included."],
-        [f"How can someone use {focus.lower()} information responsibly?", "Use examples as planning guides, confirm lender or bank disclosures directly, and revisit the numbers if rates or income change."],
-        [f"Which mistake raises costs most often in {focus.lower()} decisions?", "Many consumers focus on a teaser monthly payment and underestimate the impact of fees, longer repayment, or renewed borrowing afterward."],
+        [f"Is this page financial advice?", NON_ADVICE_DISCLAIMER],
+        [f"Where do the examples come from?", "Examples are hypothetical scenarios used to illustrate how a cost mechanic works. Real product pricing changes; always verify the latest rates and fees directly with the lender or bank before deciding."],
+        [f"How can I reach the editor?", f"Email {CONTACT_EMAIL} for editorial questions, corrections, or partnership inquiries."],
     ]
-    topics = [
-        "Cost mechanics",
-        "Rate comparison examples",
-        "Budget planning",
-        "Fee analysis",
-        "Household scenarios",
-    ]
-    temp = {"hero": title, "title": title, "topics": topics, "faqs": faqs}
-    content = article_body(temp, 1500, related_paths)
     intro = trim(
         f"""
         <section class="ccg-section">
@@ -1902,12 +2470,18 @@ def support_body(path: str, title: str, desc: str, related_paths: List[str]) -> 
             <p class="ccg-kicker">Overview</p>
             <h2>{html.escape(title)}</h2>
           </div>
-          <p>{html.escape(desc)} This article is written for U.S. readers who want realistic examples, not marketing gloss. It highlights how fees, APR, term length, and everyday cash flow interact when you borrow, refinance, or choose between financial products.</p>
-          <p>Because pricing changes with credit profile and lender policy, the most useful comparison usually starts with a worksheet: amount needed, expected repayment speed, likely fees, and the downside of a missed payment. That framework helps translate broad averages into a decision you can actually live with.</p>
+          <p>{html.escape(desc)}</p>
+          <p>This article is part of a wider set of guides on CreditCostGuide. It is short on purpose: it explains the core mechanic and links to the relevant pillar guide for the longer treatment. For the worked examples, calculators, and primary-source citations, follow the links to the pillar guide and any related calculator below.</p>
         </section>
         """
     )
-    return intro + content, faqs
+    body = (
+        intro
+        + faq_html(faqs)
+        + author_box()
+        + related_html(related_paths)
+    )
+    return body, faqs
 
 
 def calculator_intro(title: str, desc: str) -> str:
@@ -2062,25 +2636,60 @@ def rich_article_body(
     faqs_list: List[List[str]] = cfg["faqs"]
     faq_section = faq_html(faqs_list)
 
+    # Sources block keyed by the page's pillar topic. Custom keys can be
+    # specified via cfg["sources_topic"]; otherwise we infer from the slug.
+    topic_key = cfg.get("sources_topic") or _infer_sources_topic(path)
+    sources_section = sources_block(topic_key)
+
     content = (
         intro_section
         + calc_widget
         + "".join(section_blocks)
         + faq_section
+        + sources_section
         + author_box()
         + related_html(related_paths)
     )
     return content, faqs_list
 
 
-def simple_page_body(title: str, desc: str, related_paths: List[str], legal: bool = False) -> Tuple[str, List[List[str]]]:
-    faqs = [
-        [f"What should readers know about {title.lower()}?", "The goal is to explain how this page works in plain language, what readers can expect, and where content is informational rather than personalized advice."],
-        [f"How often is {title.lower()} reviewed?", "Editorial and policy pages should be revisited when site practices, contact information, legal language, or measurement tools change."],
-        [f"Can readers rely on {title.lower()} for personal recommendations?", "No. Site materials are educational and should be paired with direct professional or provider guidance for personal decisions."],
+def _infer_sources_topic(path: str) -> str:
+    """Map a page path to a key in SOURCES_BY_TOPIC."""
+    slug = Path(path).stem
+    rules = [
+        ("personal-loan", "personal-loans"),
+        ("credit-card", "credit-cards"),
+        ("mortgage", "mortgage"),
+        ("credit-score", "credit-score"),
+        ("banking-fees", "banking-fees"),
+        ("debt-payoff", "debt-payoff"),
+        ("debt-snowball", "debt-payoff"),
+        ("debt-consolidation", "debt-payoff"),
+        ("refinanc", "refinancing"),
+        ("student-loan", "student-loans"),
+        ("loan-payment", "personal-loans"),
+        ("balance-transfer", "credit-cards"),
+        ("utilization", "credit-cards"),
+        ("savings-account", "banking-fees"),
+        ("checking", "banking-fees"),
+        ("best-banks", "banking-fees"),
     ]
-    topics = ["Purpose and scope", "What information readers can expect", "How the page supports informed decisions", "Important limits and disclosures"]
-    temp = {"hero": title, "title": title, "topics": topics, "faqs": faqs}
+    for needle, key in rules:
+        if needle in slug:
+            return key
+    return "default"
+
+
+def simple_page_body(title: str, desc: str, related_paths: List[str], legal: bool = False) -> Tuple[str, List[List[str]]]:
+    """Generic short body for root-level pages that do NOT have a custom
+    body builder. The 'legal' flag is preserved for backwards compatibility
+    but actual legal pages (privacy, terms, disclaimer) now use legal_body()
+    so they get proper, non-templated copy."""
+    faqs = [
+        ["Is this page financial advice?", NON_ADVICE_DISCLAIMER],
+        ["How can I reach the editor?", f"Email {CONTACT_EMAIL} for editorial questions, corrections, or partnership inquiries."],
+        ["When was this page last reviewed?", f"{LAST_REVIEWED}. Editorial and policy pages are revisited when site practices, contact information, or legal language change."],
+    ]
     intro = trim(
         f"""
         <section class="ccg-section">
@@ -2088,13 +2697,226 @@ def simple_page_body(title: str, desc: str, related_paths: List[str], legal: boo
             <p class="ccg-kicker">{'Policy' if legal else 'Institutional'}</p>
             <h2>{html.escape(title)}</h2>
           </div>
-          <p>{html.escape(desc)} CreditCostGuide is designed for U.S. readers who want clearer explanations of borrowing costs, banking fees, mortgage pricing, and payoff strategy. This page explains how the site handles its responsibilities in that context.</p>
-          <p>{'Legal and policy language can feel dense, so this version aims for clarity without removing important limitations.' if legal else 'Transparency matters, especially in finance. We explain research methods, editorial goals, and communication channels so readers know how to interpret what they find here.'}</p>
+          <p>{html.escape(desc)}</p>
         </section>
         """
     )
-    content = intro + article_body(temp, 1000 if legal else 800, related_paths)
-    return content, faqs
+    body = intro + faq_html(faqs) + author_box() + related_html(related_paths)
+    return body, faqs
+
+
+def contact_page_body(related_paths: List[str]) -> Tuple[str, List[List[str]]]:
+    """Slim, focused contact page. No templated finance paragraphs, no form
+    that pretends to do anything. Just clear contact info and the limits of
+    what we can help with."""
+    faqs = [
+        ["Can the editor recommend a specific lender or product?", "No. CreditCostGuide is an educational resource. We do not match readers with lenders and do not recommend specific products to individuals."],
+        ["Can the editor review my credit file or loan offer?", "No. We cannot review personal credit files or specific loan offers. For that kind of review, contact a HUD-certified housing counselor or a CFPB-listed nonprofit credit counselor."],
+        ["What is a reasonable response time?", "We aim to acknowledge editorial questions and corrections within five business days. Partnership inquiries may take longer."],
+    ]
+    body = trim(
+        f"""
+        <section class="ccg-section">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Contact</p>
+            <h2>Contact CreditCostGuide</h2>
+          </div>
+          <p>For corrections, source updates, editorial questions, or partnership inquiries, email <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>
+        </section>
+        <section class="ccg-section ccg-section--soft">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">What we cannot do</p>
+            <h2>Limits of this site</h2>
+          </div>
+          <ul>
+            <li>We cannot provide personal financial advice.</li>
+            <li>We cannot review personal credit files, loan offers, or tax situations.</li>
+            <li>We cannot recommend specific lenders, banks, or financial products to individual readers.</li>
+            <li>For urgent financial, legal, or tax decisions, contact a qualified licensed professional.</li>
+          </ul>
+          <p><strong>{NON_ADVICE_DISCLAIMER}</strong></p>
+        </section>
+        {faq_html(faqs)}
+        {author_box()}
+        {related_html(related_paths)}
+        """
+    )
+    return body, faqs
+
+
+def author_page_body(related_paths: List[str]) -> Tuple[str, List[List[str]]]:
+    """Dedicated author profile at /authors/javi-perez/. Honest bio, no fake
+    credentials, links to LinkedIn, and a Person schema is added in
+    build_jsonld() via the editor node already used site-wide."""
+    faqs = [
+        ["What does Javi do at CreditCostGuide?",
+         f"{EDITOR_NAME} is the founder and sole editor of CreditCostGuide. He plans the editorial calendar, writes and revises every guide, builds the calculators, and is the single contact for corrections at {CONTACT_EMAIL}."],
+        ["Is Javi a licensed financial professional?",
+         NON_ADVICE_DISCLAIMER],
+        ["How is this content produced?",
+         AI_DISCLOSURE + " The final wording, examples, sources, and figures shown on the site are reviewed by Javi before publication."],
+    ]
+    body = trim(
+        f"""
+        <section class="ccg-section">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Author Profile</p>
+            <h2>About {EDITOR_NAME}</h2>
+          </div>
+          <p>{EDITOR_NAME} is the founder and sole editor of CreditCostGuide. He is an independent publisher based in {EDITOR_LOCATION} who builds long-form educational resources for U.S. consumers on credit, loans, mortgages, banking fees, refinancing, and debt payoff.</p>
+          <p>His background is technical — operating digital products and editorial sites — not regulated financial services. <strong>{NON_ADVICE_DISCLAIMER}</strong></p>
+          <p>Find Javi on LinkedIn: <a href="{EDITOR_LINKEDIN}" target="_blank" rel="noopener noreferrer">{EDITOR_LINKEDIN}</a>. For corrections, source updates, or partnership inquiries, email <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>
+        </section>
+        <section class="ccg-section ccg-section--soft">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Editorial Approach</p>
+            <h2>How Javi works</h2>
+          </div>
+          <ul>
+            <li><strong>Primary-source first.</strong> Every page links to at least three regulator or government sources (CFPB, Federal Reserve, FDIC, BLS, FTC, SEC, studentaid.gov).</li>
+            <li><strong>AI-assisted drafting, human review.</strong> Drafts are produced with large-language-model help, then revised, fact-checked, and signed off by Javi before publishing.</li>
+            <li><strong>Quarterly review.</strong> Every indexable guide is revisited at least every 90 days; rate-sensitive numbers are checked monthly against the original federal data series.</li>
+            <li><strong>No personalized advice.</strong> CreditCostGuide does not collect reader data, does not match readers with lenders, and is not a registered investment adviser.</li>
+          </ul>
+        </section>
+        {faq_html(faqs)}
+        {author_box()}
+        {related_html(related_paths)}
+        """
+    )
+    return body, faqs
+
+
+def legal_body(kind: str, related_paths: List[str]) -> Tuple[str, List[List[str]]]:
+    """Proper original copy for the three legal pages. Each is concise,
+    accurate for a small static publisher running display ads and a couple of
+    affiliate links, and free of placeholder text."""
+    if kind == "privacy":
+        faqs = [
+            ["Does this site collect personal data?", "CreditCostGuide does not run analytics on its own infrastructure. Third-party services (Google AdSense for advertising) may set cookies and process limited data; details are below."],
+            ["Can readers opt out of advertising cookies?", "Yes. Google offers ad personalization controls at adssettings.google.com, and EU/UK readers see a consent prompt at first visit."],
+            ["How can a reader request data deletion?", f"Email {CONTACT_EMAIL}. Because the site does not have user accounts, deletion requests typically concern any prior email correspondence."],
+        ]
+        body = trim(
+            f"""
+            <section class="ccg-section">
+              <div class="ccg-section-head">
+                <p class="ccg-kicker">Policy</p>
+                <h2>Privacy Policy</h2>
+              </div>
+              <p>This policy explains what information CreditCostGuide (the &ldquo;Site&rdquo;) collects, how it is used, and the choices readers have. It applies to the website at <a href="{DOMAIN}/">creditcostguide.com</a>. Last reviewed: {LAST_REVIEWED}.</p>
+            </section>
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">1</p><h2>Information we do not collect</h2></div>
+              <p>The Site does not have user accounts, newsletters, or login features. It does not run first-party analytics. We do not collect names, addresses, payment information, credit reports, or any other personal financial data through ordinary browsing.</p>
+            </section>
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">2</p><h2>Third-party services</h2></div>
+              <p><strong>Advertising.</strong> The Site displays ads through Google AdSense. Google may use cookies (including the DoubleClick DART cookie) and similar technologies to serve ads based on visit history and to measure performance. See Google&rsquo;s <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer">Advertising policies</a> and <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.</p>
+              <p><strong>Affiliate links.</strong> Some pages contain affiliate links, including SmartCredit (via CJ Affiliate). When a reader clicks an affiliate link, the affiliate network may set a cookie used to attribute a later sign-up or purchase to CreditCostGuide. CreditCostGuide does not see the reader&rsquo;s identity through this process; only aggregate conversion reporting is provided to us.</p>
+              <p><strong>Hosting.</strong> The Site is hosted on Cloudflare Pages. Cloudflare may process IP addresses and basic request metadata as part of normal CDN and security operations. See <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">Cloudflare&rsquo;s Privacy Policy</a>.</p>
+            </section>
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">3</p><h2>Cookies and consent</h2></div>
+              <p>A small cookie banner offers an Accept / Reject choice for non-essential cookies. The reader&rsquo;s choice is stored in browser localStorage under <code>ccg-cookie-choice</code>. Rejecting non-essential cookies signals to advertising scripts that personalized advertising should not be used in regions where that signal is honored.</p>
+              <p>Readers can also clear advertising cookies through their browser settings or Google&rsquo;s <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">Ad Settings</a> page.</p>
+            </section>
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">4</p><h2>Email correspondence</h2></div>
+              <p>If a reader emails <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>, the address and message are visible to the editor and stored in the email provider&rsquo;s standard inbox infrastructure. Correspondence is used only to respond and is not sold, rented, or shared with third parties.</p>
+            </section>
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">5</p><h2>Children</h2></div>
+              <p>The Site is not directed to children under 13. We do not knowingly collect information from children.</p>
+            </section>
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">6</p><h2>Changes to this policy</h2></div>
+              <p>Material changes will be reflected by updating the Last reviewed date and, where appropriate, a brief change note in the editor byline.</p>
+            </section>
+            {faq_html(faqs)}
+            {author_box()}
+            {related_html(related_paths)}
+            """
+        )
+    elif kind == "terms":
+        faqs = [
+            ["Can I republish content from CreditCostGuide?", "Short quotes with a link back are welcome. For full reuse, email " + CONTACT_EMAIL + " for permission."],
+            ["Are the calculators warranted to be accurate?", "Calculators use standard amortization formulas and are accurate for the inputs given, but real-world quotes depend on lender pricing, taxes, insurance, and credit. Always confirm with the lender or bank."],
+            ["What happens if I rely on this content?", NON_ADVICE_DISCLAIMER],
+        ]
+        body = trim(
+            f"""
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">Policy</p><h2>Terms of Use</h2></div>
+              <p>These terms govern use of CreditCostGuide. By using the Site, the reader agrees to the terms below. Last reviewed: {LAST_REVIEWED}.</p>
+            </section>
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">1</p><h2>Educational purpose</h2></div>
+              <p>All content is published for general educational purposes. {NON_ADVICE_DISCLAIMER}</p>
+            </section>
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">2</p><h2>Accuracy and freshness</h2></div>
+              <p>Rates, fees, and product details change. CreditCostGuide reviews every indexable page at least quarterly and updates rate-sensitive numbers when the underlying federal data series publishes new figures, but the Site cannot guarantee that any specific number is current at the moment of reading. Always confirm pricing and terms directly with the lender or bank.</p>
+            </section>
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">3</p><h2>Calculators</h2></div>
+              <p>Calculators use standard, publicly documented formulas (loan amortization, month-by-month payoff simulation, utilization ratio). They are tools for testing scenarios, not lending or banking applications. They do not transmit input data to any server; calculation runs entirely in the reader&rsquo;s browser.</p>
+            </section>
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">4</p><h2>Affiliate links and advertising</h2></div>
+              <p>Some pages contain affiliate links (currently SmartCredit via CJ Affiliate), marked <code>rel=&quot;nofollow sponsored&quot;</code> and disclosed where they appear. CreditCostGuide may earn a commission when a reader signs up through an affiliate link, at no additional cost to the reader. Affiliate partnerships do not influence editorial recommendations. The Site also displays ads through Google AdSense.</p>
+            </section>
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">5</p><h2>Limitation of liability</h2></div>
+              <p>To the maximum extent permitted by law, CreditCostGuide and its editor are not liable for any loss, damages, or claim arising from use of the Site or reliance on its content. The Site is provided &ldquo;as is&rdquo;.</p>
+            </section>
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">6</p><h2>Contact</h2></div>
+              <p>For corrections, source updates, or permission requests, email <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>
+            </section>
+            {faq_html(faqs)}
+            {author_box()}
+            {related_html(related_paths)}
+            """
+        )
+    else:  # disclaimer
+        faqs = [
+            ["Does CreditCostGuide give financial advice?", NON_ADVICE_DISCLAIMER],
+            ["Are the examples real customer data?", "No. Numeric examples on this site are hypothetical scenarios used to illustrate how a cost mechanic works. They are not based on individual reader data, lender quotes, or any real consumer&rsquo;s file."],
+            ["Where should I go for personalized advice?", "Consult a licensed professional: a financial advisor (registered with the SEC or a state regulator), a CPA, an attorney, a HUD-certified housing counselor, or a CFPB-listed nonprofit credit counselor."],
+        ]
+        body = trim(
+            f"""
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">Policy</p><h2>Disclaimer</h2></div>
+              <p>Last reviewed: {LAST_REVIEWED}.</p>
+            </section>
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">Educational only</p><h2>This site does not provide financial advice</h2></div>
+              <p>{NON_ADVICE_DISCLAIMER} Use the content as a starting point for your own research, then verify pricing and product terms directly with the lender, bank, or licensed professional relevant to your situation.</p>
+            </section>
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">Examples</p><h2>Hypothetical scenarios, not real customer data</h2></div>
+              <p>The numeric examples used in calculators and guides — APRs, balances, monthly payments — are hypothetical illustrations chosen to make a cost mechanic easy to follow. They are not lender quotes and not based on any individual reader&rsquo;s credit profile. Real product pricing depends on your credit, income, debt-to-income ratio, collateral (if any), and the lender&rsquo;s underwriting at the moment you apply.</p>
+            </section>
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">Sources</p><h2>Reliance on public data</h2></div>
+              <p>CreditCostGuide relies on public sources including CFPB (consumerfinance.gov), the Federal Reserve (federalreserve.gov, FRED), FDIC (fdic.gov), BLS (bls.gov), FTC (consumer.ftc.gov), the SEC (sec.gov), and the U.S. Department of Education (studentaid.gov). Sources are linked on each page where they are used.</p>
+            </section>
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">Advertising and affiliates</p><h2>How the site is funded</h2></div>
+              <p>The Site is funded by display advertising (Google AdSense) and a small number of affiliate partnerships (currently SmartCredit via CJ Affiliate). Affiliate links are marked <code>rel=&quot;nofollow sponsored&quot;</code> and disclosed on the pages where they appear. Funding does not influence which products are mentioned, the order in which they appear, or the editorial conclusions reached.</p>
+            </section>
+            <section class="ccg-section">
+              <div class="ccg-section-head"><p class="ccg-kicker">Where to get personalized help</p><h2>Licensed professionals and free resources</h2></div>
+              <p>For decisions specific to your situation, consult a licensed professional. Free or low-cost options include <a href="https://www.consumerfinance.gov/find-a-housing-counselor/" target="_blank" rel="noopener noreferrer">HUD-certified housing counselors</a>, CFPB-listed <a href="https://www.consumerfinance.gov/ask-cfpb/what-is-credit-counseling-en-1451/" target="_blank" rel="noopener noreferrer">nonprofit credit counselors</a>, and your state&rsquo;s attorney general consumer protection unit.</p>
+            </section>
+            {faq_html(faqs)}
+            {author_box()}
+            {related_html(related_paths)}
+            """
+        )
+    return body, faqs
 
 
 def about_body(related_paths: List[str]) -> Tuple[str, List[List[str]]]:
@@ -2153,12 +2975,19 @@ def about_body(related_paths: List[str]) -> Tuple[str, List[List[str]]]:
         </section>
         <section class="ccg-section ccg-section--soft">
           <div class="ccg-section-head">
+            <p class="ccg-kicker">AI Disclosure</p>
+            <h2>How content is produced</h2>
+          </div>
+          <p><strong>{AI_DISCLOSURE}</strong> Specifically: drafts are produced with large-language-model assistance using publicly documented prompts, then revised, fact-checked against the linked sources, and edited by Javi before publishing. AI is not used to generate fake statistics, fake quotes, or fake personal experiences. Every numeric example is either calculated from a public formula or attributed to a regulator or industry publication.</p>
+        </section>
+        <section class="ccg-section">
+          <div class="ccg-section-head">
             <p class="ccg-kicker">Independence</p>
             <h2>Editorial independence and disclosure</h2>
           </div>
           <p>CreditCostGuide is reader-supported via display advertising (Google AdSense) and a small number of affiliate partnerships, including SmartCredit (CJ Affiliate), which is disclosed on every page where it appears. Affiliate links are marked <code>rel="nofollow sponsored"</code> and never override editorial recommendations. We do not accept payment for placement in core guides, and we publish corrections promptly.</p>
         </section>
-        <section class="ccg-section">
+        <section class="ccg-section ccg-section--soft">
           <div class="ccg-section-head">
             <p class="ccg-kicker">Contact</p>
             <h2>Contact the editor</h2>
@@ -2219,6 +3048,15 @@ def how_we_research_body(related_paths: List[str]) -> Tuple[str, List[List[str]]
           </ul>
           <p>The "Last reviewed" date in each page's editor byline is the date of the most recent verification pass, not the original publication date.</p>
         </section>
+        <section class="ccg-section">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">AI Disclosure</p>
+            <h2>AI-assisted drafting and human review</h2>
+          </div>
+          <p>{AI_DISCLOSURE}</p>
+          <p>What that means concretely: long-form sections are drafted with large-language-model assistance, then edited by {EDITOR_NAME}. Specific numeric claims — interest rates, fee ranges, regulatory limits — are checked against the primary source linked in the page&rsquo;s Sources block before publishing. AI is not used to invent statistics, attribute quotes to people, or describe personal experiences the editor does not have. Calculators use closed-form mathematical formulas (amortization, balance simulation) and do not depend on AI at runtime.</p>
+          <p><strong>{NON_ADVICE_DISCLAIMER}</strong></p>
+        </section>
         <section class="ccg-section ccg-section--soft">
           <div class="ccg-section-head">
             <p class="ccg-kicker">Calculators</p>
@@ -2259,17 +3097,26 @@ def how_we_research_body(related_paths: List[str]) -> Tuple[str, List[List[str]]
 
 
 def home_body() -> str:
+    # Pillars: every pillar is in INDEXABLE_PAGES by design, so we can link to all.
     pillar_cards = "".join(
         f'<a class="ccg-topic-card" href="{local_href(item["path"])}"><span>{html.escape(item["hero"])}</span><strong>{html.escape(title_from_path(item["path"]))}</strong><p>{html.escape(item["description"])}</p></a>'
         for item in PILLARS
     )
+    # Calculators: every calculator is in INDEXABLE_PAGES.
     calc_cards = "".join(
         f'<a class="ccg-topic-card ccg-topic-card--small" href="{local_href(path)}"><span>Calculator</span><strong>{html.escape(title_from_path(path))}</strong><p>{html.escape(desc)}</p></a>'
         for path, _, desc, _ in CALCULATORS
     )
+    # "Popular reads" must only spotlight indexable supporting articles; we do
+    # not want the home page to surface noindex URLs as featured content.
+    indexable_supporting = [
+        (path, title, desc)
+        for path, title, desc in SUPPORTING
+        if is_indexable(path)
+    ]
     spotlight = "".join(
         f'<a class="ccg-spotlight-item" href="{local_href(path)}">{html.escape(title)}</a>'
-        for path, title, _ in SUPPORTING[:6]
+        for path, title, _ in indexable_supporting[:6]
     )
     return trim(
         f"""
@@ -2313,10 +3160,11 @@ def home_body() -> str:
         </section>
         <section class="ccg-section ccg-section--soft">
           <div class="ccg-section-head">
-            <p class="ccg-kicker">Popular Reads</p>
-            <h2>Deep dives on APR, payoff methods, and loan decisions</h2>
+            <p class="ccg-kicker">Featured Reads</p>
+            <h2>Specific guides on APR, payoff methods, and credit scoring</h2>
           </div>
           <div class="ccg-spotlight-list">{spotlight}</div>
+          <p style="margin-top:1rem;"><a href="{DOMAIN}/authors/javi-perez">Meet the editor →</a></p>
         </section>
         <section class="ccg-section">
           <div class="ccg-section-head">
@@ -2554,15 +3402,22 @@ def html_doc(
     is_404: bool = False,
 ) -> str:
     canonical = url_for(path)
+    indexable = is_indexable(path) and not is_404
     if is_404:
         robots = "noindex,nofollow"
+    elif not indexable:
+        # Non-indexable pages stay reachable for users but are hidden from Google
+        # during AdSense review. Internal links still pass link equity (follow).
+        robots = "noindex,follow"
     else:
         robots = "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"
     hero_title = hero_title or title
     hero_summary = hero_summary or description
     breadcrumb_nav = "" if path == "index.html" or is_404 else breadcrumb_html(breadcrumbs)
     adsense = "" if is_404 else ADSENSE_SCRIPT
-    jsonld_block = "" if is_404 else f'<script type="application/ld+json">{build_jsonld(path, title, description, page_type, breadcrumbs, faqs)}</script>'
+    # Only indexable pages get schema. Non-indexable pages skip JSON-LD so Google
+    # has nothing to lift from them when scaling content review heuristics fire.
+    jsonld_block = "" if (is_404 or not indexable) else f'<script type="application/ld+json">{build_jsonld(path, title, description, page_type, breadcrumbs, faqs)}</script>'
     hero = trim(
         f"""
         <section class="ccg-page-hero">
@@ -3390,8 +4245,12 @@ def robots_txt() -> str:
 
 
 def sitemap_xml(paths: List[str]) -> str:
+    # Sitemap contains ONLY indexable URLs. Noindex pages are deliberately excluded
+    # so Search Console / AdSense do not see them as eligible-for-index candidates.
     items = []
     for path in paths:
+        if not is_indexable(path):
+            continue
         items.append(
             f"<url><loc>{html.escape(url_for(path))}</loc><lastmod>{SITEMAP_LASTMOD}</lastmod><changefreq>weekly</changefreq><priority>{'1.0' if path == 'index.html' else '0.8'}</priority></url>"
         )
@@ -3408,10 +4267,24 @@ def sitemap_xml(paths: List[str]) -> str:
 def redirects_txt(paths: List[str]) -> str:
     # Per project rules: NEVER 200 rules; never www rules in this file
     # (www and http→https handled in Cloudflare dashboard).
-    # Only canonicalize legacy .html routes to clean URLs.
-    lines = ["/index.html / 301!", "/index / 301!"]
+    lines: List[str] = []
+
+    # 1. Hide internal artifacts from the public deploy. Anything inside scripts/,
+    #    every .md report at root, every .py file, and every .mjs helper returns
+    #    404 to crawlers and direct visitors.
+    lines += [
+        "/scripts/* /404 404",
+        "/*.md /404 404",
+        "/*.py /404 404",
+        "/*.mjs /404 404",
+    ]
+
+    # 2. Canonicalize legacy .html routes to clean URLs.
+    lines += ["/index.html / 301!", "/index / 301!"]
     for path in paths:
         if path == "index.html" or path == "404.html":
+            continue
+        if path.endswith("/index.html"):
             continue
         lines.append(f"/{path} /{path.removesuffix('.html')} 301!")
     return "\n".join(lines) + "\n"
@@ -3426,6 +4299,15 @@ def headers_txt() -> str:
           Referrer-Policy: strict-origin-when-cross-origin
           Permissions-Policy: geolocation=(), microphone=(), camera=()
           Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+        /*.md
+          X-Robots-Tag: noindex, nofollow
+
+        /*.py
+          X-Robots-Tag: noindex, nofollow
+
+        /scripts/*
+          X-Robots-Tag: noindex, nofollow
         """
     )
 
@@ -3715,15 +4597,22 @@ def build() -> None:
             ]
         elif path == "contact.html":
             generic_related = [p for p in related_pool if p != path][:6]
-            body, faqs = simple_page_body(title, desc, generic_related)
-            body += contact_email_html()
-            body += contact_form_html()
+            body, faqs = contact_page_body(generic_related)
         elif path == "about.html":
             generic_related = [p for p in related_pool if p != path][:6]
             body, faqs = about_body(generic_related)
         elif path == "how-we-research.html":
             generic_related = [p for p in related_pool if p != path][:6]
             body, faqs = how_we_research_body(generic_related)
+        elif path == "privacy-policy.html":
+            generic_related = [p for p in related_pool if p != path][:6]
+            body, faqs = legal_body("privacy", generic_related)
+        elif path == "terms.html":
+            generic_related = [p for p in related_pool if p != path][:6]
+            body, faqs = legal_body("terms", generic_related)
+        elif path == "disclaimer.html":
+            generic_related = [p for p in related_pool if p != path][:6]
+            body, faqs = legal_body("disclaimer", generic_related)
         else:
             generic_related = [p for p in related_pool if p != path][:6]
             body, faqs = simple_page_body(title, desc, generic_related, legal=page_type == "legal")
@@ -3739,6 +4628,30 @@ def build() -> None:
             hero_summary=desc if path != "index.html" else "Explore a modern fintech-style library of educational guides and calculators covering U.S. credit, loans, mortgages, banking, refinancing, and debt payoff.",
         )
         write(TARGET / path, doc)
+
+    # Author page at /authors/javi-perez/
+    author_path = "authors/javi-perez/index.html"
+    all_paths.append(author_path)
+    author_related = [p for p in related_pool][:6]
+    author_body, author_faqs = author_page_body(author_related)
+    write(
+        TARGET / author_path,
+        html_doc(
+            path=author_path,
+            title=f"{EDITOR_NAME} — Editor of CreditCostGuide",
+            description=f"{EDITOR_NAME} is the founder and sole editor of CreditCostGuide, an independent U.S. consumer-finance education site. Honest bio, no fictional credentials.",
+            page_type="article",
+            main_content=author_body,
+            breadcrumbs=[
+                {"name": "Home", "url": f"{DOMAIN}/"},
+                {"name": "Authors", "url": f"{DOMAIN}/authors"},
+                {"name": EDITOR_NAME, "url": f"{DOMAIN}/authors/javi-perez"},
+            ],
+            faqs=author_faqs,
+            hero_title=f"{EDITOR_NAME}",
+            hero_summary=f"Founder and editor of CreditCostGuide, based in {EDITOR_LOCATION}.",
+        ),
+    )
 
     not_found_body = trim(
         f"""

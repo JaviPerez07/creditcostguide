@@ -1,3 +1,7 @@
+/scripts/* /404 404
+/*.md /404 404
+/*.py /404 404
+/*.mjs /404 404
 /index.html / 301!
 /index / 301!
 /pages/personal-loans-guide.html /pages/personal-loans-guide 301!

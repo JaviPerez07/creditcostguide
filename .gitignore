@@ -1,0 +1,14 @@
+# Local-only working files (audit reports, scratch notes, logs).
+# Anything that should never appear in the public deploy goes here.
+.local-reports/
+*.local.md
+*.log
+node_modules/
+
+# macOS noise.
+.DS_Store
+
+# Editor noise.
+.vscode/
+.idea/
+*.swp

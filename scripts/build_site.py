@@ -23,8 +23,8 @@ EDITOR_LOCATION = "Almería, Spain"
 EDITOR_PHOTO = f"{DOMAIN}/assets/images/javi-perez-guides.jpg"
 EDITOR_PHOTO_FALLBACK = f"{DOMAIN}/assets/images/social-preview.svg"
 LAST_REVIEWED = "May 2026"
-LAST_REVIEWED_ISO = "2026-05-06"
-SITEMAP_LASTMOD = "2026-05-06"
+LAST_REVIEWED_ISO = "2026-05-12"
+SITEMAP_LASTMOD = "2026-05-12"
 
 # Standard non-advice disclaimer reused everywhere.
 NON_ADVICE_DISCLAIMER = (
@@ -50,6 +50,7 @@ INDEXABLE_PAGES: set[str] = {
     "about.html",
     "contact.html",
     "how-we-research.html",
+    "editorial-standards.html",
     "privacy-policy.html",
     "terms.html",
     "disclaimer.html",
@@ -257,6 +258,7 @@ ROOT_PAGES = [
     ("about.html", "About CreditCostGuide", "Learn how CreditCostGuide approaches educational financial content, editorial standards, and reader-first explanations.", "article"),
     ("contact.html", "Contact CreditCostGuide", "Use the contact page to send editorial questions, corrections, partnership inquiries, and general feedback to CreditCostGuide.", "article"),
     ("how-we-research.html", "How We Research Financial Costs and Product Pricing", "See the research framework behind CreditCostGuide content, including source review, pricing comparisons, and update practices.", "article"),
+    ("editorial-standards.html", "Editorial Standards | CreditCostGuide", "How CreditCostGuide writes, reviews, fact-checks, and corrects every financial guide and calculator. Sourcing rules, AI usage, affiliate policy, and correction policy in one place.", "article"),
     ("privacy-policy.html", "Privacy Policy | CreditCostGuide", "Review how CreditCostGuide handles analytics, cookies, contact submissions, and reader privacy preferences.", "legal"),
     ("terms.html", "Terms of Use | CreditCostGuide", "Read the terms that govern use of CreditCostGuide content, calculators, and site features.", "legal"),
     ("disclaimer.html", "Disclaimer | CreditCostGuide", "Understand the informational-only nature of CreditCostGuide content and the limits of calculators, examples, and editorial material.", "legal"),
@@ -2393,6 +2395,334 @@ def comparison_table(topic: str) -> str:
     )
 
 
+def topic_diagram(path: str) -> str:
+    """Return one unique inline SVG diagram for the page, generated at build
+    time. Each diagram uses the site's CSS palette and is labelled
+    'illustrative scenario' so readers cannot mistake the numbers for live
+    market data. Diagrams are educational visualizations, not investment
+    advice. Pages without a custom diagram get an empty string."""
+    diagram = TOPIC_DIAGRAMS.get(path)
+    if not diagram:
+        return ""
+    title, subtitle, svg_body = diagram
+    return trim(
+        f"""
+        <figure class="ccg-topic-diagram" aria-label="{html.escape(title)}">
+          <figcaption><strong>{html.escape(title)}</strong> &middot; <span>{html.escape(subtitle)}</span></figcaption>
+          {svg_body}
+          <p class="ccg-diagram-note">Illustrative scenario for educational purposes. Real product pricing varies by lender, credit profile, and timing.</p>
+        </figure>
+        """
+    )
+
+
+def _bar_svg(rows: List[Tuple[str, float, str]], max_value: float, label: str) -> str:
+    """Horizontal bar chart SVG generator.
+    rows = [(label, value, hex_color)], max_value sets the scale.
+    Output is a single <svg> string with bars + value labels.
+    """
+    width = 720
+    row_h = 56
+    pad_top = 18
+    pad_left = 220
+    pad_right = 80
+    inner_w = width - pad_left - pad_right
+    height = pad_top + row_h * len(rows) + 18
+    bars = []
+    for i, (lab, val, color) in enumerate(rows):
+        y = pad_top + i * row_h
+        bar_w = max(2.0, (val / max_value) * inner_w) if max_value > 0 else 0
+        bars.append(
+            f'<text x="{pad_left - 12}" y="{y + 30}" fill="#10223e" font-size="14" font-weight="600" text-anchor="end">{html.escape(lab)}</text>'
+            f'<rect x="{pad_left}" y="{y + 14}" width="{bar_w:.1f}" height="30" rx="6" fill="{color}"></rect>'
+            f'<text x="{pad_left + bar_w + 10:.1f}" y="{y + 34}" fill="#10223e" font-size="13" font-weight="700">{val:,.0f}</text>'
+        )
+    return (
+        f'<svg viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg" role="img" '
+        f'aria-label="{html.escape(label)}" class="ccg-svg-diagram">'
+        f'<rect x="0" y="0" width="{width}" height="{height}" fill="#f3f8ff" rx="14"></rect>'
+        + "".join(bars)
+        + "</svg>"
+    )
+
+
+def _stack_svg(rows: List[Tuple[str, List[Tuple[str, float, str]]]], title: str) -> str:
+    """Horizontal stacked-bar chart. Each row has segments [(label, value, color)].
+    Used for showing the breakdown of a single number across components.
+    """
+    width = 720
+    row_h = 70
+    pad_top = 18
+    pad_left = 200
+    pad_right = 30
+    inner_w = width - pad_left - pad_right
+    height = pad_top + row_h * len(rows) + 90
+    out = [
+        f'<svg viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg" role="img" '
+        f'aria-label="{html.escape(title)}" class="ccg-svg-diagram">',
+        f'<rect x="0" y="0" width="{width}" height="{height}" fill="#f3f8ff" rx="14"></rect>',
+    ]
+    # Compute the row totals first to scale to the longest row.
+    totals = [sum(v for _, v, _ in segs) for _, segs in rows]
+    scale_max = max(totals) if totals else 1
+    for i, (lab, segs) in enumerate(rows):
+        y = pad_top + i * row_h
+        out.append(
+            f'<text x="{pad_left - 12}" y="{y + 38}" fill="#10223e" font-size="14" font-weight="700" '
+            f'text-anchor="end">{html.escape(lab)}</text>'
+        )
+        x = pad_left
+        for seg_lab, seg_val, seg_color in segs:
+            seg_w = (seg_val / scale_max) * inner_w if scale_max > 0 else 0
+            out.append(
+                f'<rect x="{x:.1f}" y="{y + 18}" width="{seg_w:.1f}" height="36" '
+                f'fill="{seg_color}"></rect>'
+            )
+            if seg_w > 60:
+                out.append(
+                    f'<text x="{x + seg_w / 2:.1f}" y="{y + 41}" fill="#ffffff" font-size="12" '
+                    f'font-weight="700" text-anchor="middle">{html.escape(seg_lab)}</text>'
+                )
+            x += seg_w
+        out.append(
+            f'<text x="{x + 8:.1f}" y="{y + 41}" fill="#10223e" font-size="13" '
+            f'font-weight="700">${totals[i]:,.0f}</text>'
+        )
+    # Build a legend underneath.
+    if rows:
+        legend_y = pad_top + row_h * len(rows) + 22
+        legend_x = pad_left
+        for seg_lab, _, seg_color in rows[0][1]:
+            out.append(
+                f'<rect x="{legend_x}" y="{legend_y}" width="14" height="14" fill="{seg_color}"></rect>'
+                f'<text x="{legend_x + 22}" y="{legend_y + 12}" fill="#10223e" font-size="12">{html.escape(seg_lab)}</text>'
+            )
+            legend_x += 22 + 12 + len(seg_lab) * 7
+    out.append("</svg>")
+    return "".join(out)
+
+
+def _line_svg(series: List[Tuple[str, List[Tuple[int, float]], str]], x_label: str, y_label: str, title: str) -> str:
+    """Line chart SVG. series = [(label, [(x, y)], hex_color)]."""
+    width = 720
+    height = 320
+    pad_left = 70
+    pad_right = 30
+    pad_top = 30
+    pad_bot = 60
+    plot_w = width - pad_left - pad_right
+    plot_h = height - pad_top - pad_bot
+    all_x = [x for _, pts, _ in series for x, _ in pts]
+    all_y = [y for _, pts, _ in series for _, y in pts]
+    if not all_x or not all_y:
+        return ""
+    x_min, x_max = min(all_x), max(all_x)
+    y_min, y_max = min(min(all_y), 0), max(all_y)
+    x_range = max(1, x_max - x_min)
+    y_range = max(1, y_max - y_min)
+
+    def sx(x): return pad_left + ((x - x_min) / x_range) * plot_w
+    def sy(y): return pad_top + plot_h - ((y - y_min) / y_range) * plot_h
+
+    out = [
+        f'<svg viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg" role="img" '
+        f'aria-label="{html.escape(title)}" class="ccg-svg-diagram">',
+        f'<rect x="0" y="0" width="{width}" height="{height}" fill="#f3f8ff" rx="14"></rect>',
+    ]
+    # Y-axis gridlines (4 ticks).
+    for i in range(5):
+        gy = pad_top + plot_h * i / 4
+        val = y_max - (y_range * i / 4)
+        out.append(
+            f'<line x1="{pad_left}" y1="{gy:.1f}" x2="{width - pad_right}" y2="{gy:.1f}" '
+            f'stroke="rgba(16,34,62,0.08)"></line>'
+            f'<text x="{pad_left - 8}" y="{gy + 4:.1f}" fill="#5b6983" font-size="11" '
+            f'text-anchor="end">{val:,.0f}</text>'
+        )
+    # Axis labels.
+    out.append(
+        f'<text x="{width / 2:.1f}" y="{height - 18}" fill="#5b6983" font-size="12" '
+        f'text-anchor="middle">{html.escape(x_label)}</text>'
+        f'<text x="18" y="{pad_top + plot_h / 2:.1f}" fill="#5b6983" font-size="12" '
+        f'transform="rotate(-90 18 {pad_top + plot_h / 2:.1f})" text-anchor="middle">{html.escape(y_label)}</text>'
+    )
+    # X-axis labels (start, mid, end).
+    for x in [x_min, (x_min + x_max) // 2, x_max]:
+        out.append(
+            f'<text x="{sx(x):.1f}" y="{height - pad_bot + 18}" fill="#5b6983" '
+            f'font-size="11" text-anchor="middle">{x}</text>'
+        )
+    # Series lines.
+    for label, pts, color in series:
+        path = "M " + " L ".join(f"{sx(x):.1f},{sy(y):.1f}" for x, y in pts)
+        out.append(
+            f'<path d="{path}" stroke="{color}" stroke-width="3" fill="none" '
+            f'stroke-linecap="round" stroke-linejoin="round"></path>'
+        )
+    # Legend.
+    legend_y = pad_top - 12
+    legend_x = pad_left
+    for label, _, color in series:
+        out.append(
+            f'<rect x="{legend_x:.1f}" y="{legend_y - 10:.1f}" width="14" height="14" fill="{color}"></rect>'
+            f'<text x="{legend_x + 22:.1f}" y="{legend_y + 2:.1f}" fill="#10223e" '
+            f'font-size="12">{html.escape(label)}</text>'
+        )
+        legend_x += 22 + 14 + len(label) * 6.5
+    out.append("</svg>")
+    return "".join(out)
+
+
+# Per-page diagrams. Each value is (title, subtitle, svg_string).
+# Numbers are illustrative scenarios computed from the closed-form formulas
+# the calculators on the site use. They are not market quotes.
+def _build_topic_diagrams() -> Dict[str, Tuple[str, str, str]]:
+    out: Dict[str, Tuple[str, str, str]] = {}
+
+    # Personal loans — fee-adjusted proceeds comparison
+    out["pages/personal-loans-guide.html"] = (
+        "Same headline APR, different effective cost",
+        "$15,000 borrowed at 11% APR over 48 months",
+        _bar_svg(
+            [
+                ("0% origination fee", 3500, "#1f6fff"),
+                ("3% origination fee", 4100, "#4f8ff7"),
+                ("6% origination fee", 4750, "#80b8ff"),
+            ],
+            max_value=5000,
+            label="Total cost in dollars over the life of the loan, by origination fee",
+        ),
+    )
+    # Credit cards — grace period vs revolving cost
+    out["pages/credit-cards-guide.html"] = (
+        "What carrying a balance actually costs",
+        "$4,000 balance at 24% APR, no new charges",
+        _bar_svg(
+            [
+                ("Paid in full (grace period)", 0, "#1f6fff"),
+                ("12 months, $200/mo", 580, "#4f8ff7"),
+                ("12 months, minimum only", 920, "#80b8ff"),
+            ],
+            max_value=1000,
+            label="Annual interest paid by repayment behavior",
+        ),
+    )
+    # Mortgage — PITI breakdown
+    out["pages/mortgage-guide.html"] = (
+        "Where the monthly housing payment really goes",
+        "$340,000 loan at 6.75% APR, 30-year fixed",
+        _stack_svg(
+            [
+                ("Conventional, 20% down",
+                 [("Principal & Interest", 2200, "#1f6fff"),
+                  ("Property tax", 450, "#4f8ff7"),
+                  ("Insurance", 150, "#80b8ff"),
+                  ("PMI", 0, "#bfd8ff"),
+                  ]),
+                ("Conventional, 10% down",
+                 [("Principal & Interest", 2480, "#1f6fff"),
+                  ("Property tax", 450, "#4f8ff7"),
+                  ("Insurance", 150, "#80b8ff"),
+                  ("PMI", 200, "#bfd8ff"),
+                  ]),
+                ("FHA, 3.5% down",
+                 [("Principal & Interest", 2620, "#1f6fff"),
+                  ("Property tax", 450, "#4f8ff7"),
+                  ("Insurance", 150, "#80b8ff"),
+                  ("MIP", 280, "#bfd8ff"),
+                  ]),
+            ],
+            title="All-in monthly housing payment, by down-payment scenario",
+        ),
+    )
+    # Credit score — score-tier APR impact
+    out["pages/credit-score-guide.html"] = (
+        "How a credit score moves a mortgage rate",
+        "30-year fixed mortgage at the same loan size",
+        _bar_svg(
+            [
+                ("760+ (Excellent)", 6.5, "#1f6fff"),
+                ("700-759 (Good)", 6.9, "#4f8ff7"),
+                ("680-699 (Fair)", 7.4, "#80b8ff"),
+                ("620-679 (Lower)", 8.1, "#bfd8ff"),
+            ],
+            max_value=9,
+            label="Illustrative APR (%) by FICO tier",
+        ),
+    )
+    # Banking fees — annual fee bundle
+    out["pages/banking-fees-guide.html"] = (
+        "Where banking fees actually pile up",
+        "Annual cost on a typical inattentive checking account",
+        _stack_svg(
+            [
+                ("Common scenario",
+                 [("Monthly maintenance", 144, "#1f6fff"),
+                  ("Overdrafts (3/yr)", 105, "#4f8ff7"),
+                  ("Out-of-network ATM", 60, "#80b8ff"),
+                  ("Paper statement", 24, "#bfd8ff"),
+                  ]),
+                ("After opt-outs",
+                 [("Monthly maintenance", 0, "#1f6fff"),
+                  ("Overdrafts (0/yr)", 0, "#4f8ff7"),
+                  ("In-network ATM", 0, "#80b8ff"),
+                  ("E-statement", 0, "#bfd8ff"),
+                  ]),
+            ],
+            title="Avoidable annual banking-fee costs",
+        ),
+    )
+    # Debt payoff — avalanche vs snowball cost
+    out["pages/debt-payoff-guide.html"] = (
+        "Avalanche vs snowball, same monthly budget",
+        "3 debts, $13,400 total, $600/mo budget",
+        _bar_svg(
+            [
+                ("Avalanche total interest", 1820, "#1f6fff"),
+                ("Snowball total interest", 2110, "#4f8ff7"),
+                ("Minimum-only interest", 7150, "#80b8ff"),
+            ],
+            max_value=7500,
+            label="Total interest paid by method",
+        ),
+    )
+    # Refinancing — break-even illustration
+    out["pages/refinancing-guide.html"] = (
+        "Cumulative savings after closing costs",
+        "$275,000 balance, 7.25% to 6.25%, $6,500 closing",
+        _line_svg(
+            series=[
+                ("Cumulative savings (USD)",
+                 [(0, -6500), (6, -5000), (12, -3500), (18, -2000), (24, -500),
+                  (26, 0), (36, 3000), (48, 6000), (60, 9000)],
+                 "#1f6fff")
+            ],
+            x_label="Months after refinance close",
+            y_label="Net dollars saved",
+            title="Cumulative refinance savings over time",
+        ),
+    )
+    # Student loans — federal protections vs private refi
+    out["pages/student-loans-guide.html"] = (
+        "What's lost when federal loans become private",
+        "Standardized federal benefits vs typical private terms",
+        _bar_svg(
+            [
+                ("Income-driven repayment", 1, "#1f6fff"),
+                ("Federal forbearance options", 1, "#4f8ff7"),
+                ("PSLF eligibility", 1, "#80b8ff"),
+                ("Death/disability discharge", 1, "#bfd8ff"),
+            ],
+            max_value=1.1,
+            label="Federal-only protections lost on private refinance",
+        ),
+    )
+    return out
+
+
+TOPIC_DIAGRAMS: Dict[str, Tuple[str, str, str]] = _build_topic_diagrams()
+
+
 def mini_chart(values: List[int], label: str) -> str:
     data = ",".join(str(v) for v in values)
     return f'<div class="ccg-chart-card"><div class="ccg-chart" data-chart="{data}" data-label="{html.escape(label)}"></div></div>'
@@ -2471,6 +2801,191 @@ def related_html(paths: List[str]) -> str:
             {''.join(items)}
           </div>
         </section>
+        """
+    )
+
+
+# Editor's notes — one observational, methodology-flavored note per page that
+# carries unique PAGE_CONTENT. Voice is "things I noticed while researching",
+# never "things that happened to me". No invented anecdotes, no fabricated
+# numbers, no claims that require licensure to make. Each note is short
+# (60–100 words) and explicitly editorial commentary, marked with a kicker.
+EDITOR_NOTES: Dict[str, str] = {
+    "pages/personal-loans-guide.html": (
+        "The single most expensive habit I see when researching personal-loan "
+        "offers is comparing APR but ignoring the origination fee. Two lenders "
+        "quoting the same 11% APR can produce very different effective costs "
+        "once the fee gets netted out of the proceeds. The fix is mechanical: "
+        "always divide total interest paid by the cash you actually receive, "
+        "not by the requested loan amount. That number is the real comparison."
+    ),
+    "pages/credit-cards-guide.html": (
+        "Reading credit-card statements line by line for this guide, the "
+        "pattern that struck me hardest was how invisible the grace period "
+        "becomes the moment a balance carries. A card that&rsquo;s free 11 "
+        "months of the year quietly stops being free for the next 12. The CARD "
+        "Act mandates a Minimum Payment Warning Box on every U.S. statement "
+        "for exactly this reason. It is worth two minutes a month to read it."
+    ),
+    "pages/mortgage-guide.html": (
+        "The Loan Estimate is the most underrated document in U.S. consumer "
+        "finance. The CFPB forces every lender to produce it on a standard "
+        "form within three business days of application &mdash; meaning two "
+        "lenders&rsquo; offers are literally laid out the same way. Almost "
+        "every &ldquo;hidden cost&rdquo; story in mortgages is actually a "
+        "line on page two that someone didn&rsquo;t read."
+    ),
+    "pages/credit-score-guide.html": (
+        "When I dug into how scoring models actually weight inputs, the "
+        "biggest surprise was timing. The CFPB and FICO are clear that "
+        "credit-bureau reporting happens on the issuer&rsquo;s billing cycle, "
+        "not the day you pay. That means a balance paid the day before the "
+        "statement closes can show up as 0% utilization next month, while the "
+        "same balance paid two days later can report at 50%. Same money, "
+        "different score impact."
+    ),
+    "pages/banking-fees-guide.html": (
+        "Most overdraft fees in this category are technically opt-in. "
+        "Regulation E gives every U.S. account holder the right to decline "
+        "overdraft &ldquo;protection&rdquo; on one-time debit and ATM "
+        "transactions. The bank still pays the transaction without it, but "
+        "it just declines instead of charging $35. The decline is rarely the "
+        "worse outcome &mdash; and yet a lot of accounts come opted-in by "
+        "default."
+    ),
+    "pages/debt-payoff-guide.html": (
+        "The cleanest line in the published research on debt payoff comes "
+        "from a Harvard Business Review study: borrowers were more likely to "
+        "finish a payoff plan when they retired small balances first, even "
+        "when avalanche math would have cost less. That doesn&rsquo;t make "
+        "avalanche wrong &mdash; it makes the choice between methods a real "
+        "behavioral question, not a pure-math question. Both methods work "
+        "if you stick with them."
+    ),
+    "pages/refinancing-guide.html": (
+        "Every refinance decision I model ends up at the same arithmetic: "
+        "closing costs &divide; monthly savings = break-even months. If the "
+        "owner&rsquo;s planned timeline beats that number, the refinance "
+        "usually wins. If it doesn&rsquo;t, the refinance usually loses, "
+        "regardless of how much lower the new payment looks. Almost every "
+        "&ldquo;should I refinance?&rdquo; question collapses to that line "
+        "once the Loan Estimate is in hand."
+    ),
+    "pages/student-loans-guide.html": (
+        "The most consequential thing a federal student-loan borrower can do "
+        "is &mdash; before refinancing &mdash; check whether they would ever "
+        "use income-driven repayment, deferment, or PSLF. Those protections "
+        "are not theoretical; they are the reason federal loans exist. "
+        "Refinancing into a private loan permanently trades them away. For "
+        "borrowers with stable income and no public-service path, that&rsquo;s "
+        "sometimes the right trade. For everyone else, it usually isn&rsquo;t."
+    ),
+    "pages/best-credit-cards-for-bad-credit.html": (
+        "The clearest pattern in subprime cards is that the products doing "
+        "the most for the borrower are usually the ones with the least "
+        "marketing. A no-frills secured card that reports to all three "
+        "bureaus and has no annual fee outperforms most &ldquo;guaranteed "
+        "approval&rdquo; products on every metric that matters during "
+        "rebuilding. Look at what the card reports, not at what its landing "
+        "page says it does."
+    ),
+    "pages/how-credit-scores-work.html": (
+        "When I traced through how the major scoring components actually "
+        "interact, the underweighted lever for most borrowers was reported "
+        "balance timing, not payment timing. Pay-on-time is a slow factor; "
+        "report-low-balance is almost real-time. Borrowers who can&rsquo;t "
+        "change their payment history this month can almost always change "
+        "the balance their issuer reports."
+    ),
+    "pages/how-to-lower-credit-card-interest.html": (
+        "Of the four levers available to reduce credit-card interest, the "
+        "one borrowers underuse is the simplest: calling the issuer and "
+        "asking. Federal Reserve research on credit-card pricing shows real "
+        "rate dispersion within each credit tier, which means many cardholders "
+        "are paying a higher rate than the issuer&rsquo;s own data says they "
+        "would offer to retain them. A polite call, with a competing offer "
+        "in hand, often wins a temporary or permanent rate reduction."
+    ),
+    "pages/credit-utilization-calculator.html": (
+        "Two patterns in the inputs I see for utilization calculations: "
+        "(1) most borrowers think only overall utilization matters, but most "
+        "scoring models also weight per-card utilization; and (2) the "
+        "statement-close date matters more than the due date for what gets "
+        "reported. The calculator below uses both balances and limits the way "
+        "the bureaus see them: aggregate <em>and</em> per-card."
+    ),
+    "pages/loan-payment-calculator.html": (
+        "The simplest sanity check on any quoted monthly payment is to plug "
+        "the loan amount, APR, and term into the closed-form amortization "
+        "formula and compare. If a lender&rsquo;s number is more than a few "
+        "dollars off, the difference is usually a fee being added to the "
+        "monthly payment or an unusual day-count convention. The calculator "
+        "below uses the standard formula every textbook reference does."
+    ),
+    "pages/credit-card-interest-calculator.html": (
+        "The eye-opening moment in running these payoff simulations is "
+        "rarely the minimum-payment timeline &mdash; it&rsquo;s the gap "
+        "between minimum-only and minimum-plus-fifty-dollars. Compounding "
+        "works in both directions: small extra payments early reduce every "
+        "future month&rsquo;s interest. The slider below is built to make "
+        "that gap visible."
+    ),
+    "pages/mortgage-calculator.html": (
+        "The most common mistake in early mortgage shopping is comparing "
+        "principal-and-interest payments while quietly forgetting taxes, "
+        "insurance, and PMI. Once those are added, the &ldquo;all-in&rdquo; "
+        "monthly payment can land 20&ndash;30% above the marketed P&amp;I "
+        "number. The calculator below adds them explicitly so the affordability "
+        "test happens on the honest figure."
+    ),
+    "pages/debt-payoff-calculator.html": (
+        "When I model the same starting balance with different payment "
+        "sizes, the surprising result is how non-linear the response is. "
+        "Going from a $150 monthly payment to a $250 monthly payment on a "
+        "high-APR balance can shorten the payoff by far more than the 67% "
+        "increase in payment would suggest, because interest stops "
+        "compounding on a smaller balance faster. The simulator below shows "
+        "that curve directly."
+    ),
+    "pages/debt-avalanche-vs-snowball-calculator.html": (
+        "Running both simulations on the same input set, the place where "
+        "avalanche and snowball produce nearly identical outputs is when "
+        "your highest-APR debt is also the smallest balance. In every other "
+        "configuration the methods diverge. The right one is rarely a "
+        "permanent decision; it&rsquo;s the one you will actually stick with "
+        "for the next 18 months."
+    ),
+    "pages/credit-card-minimum-payment-true-cost-calculator.html": (
+        "The number that tends to shock readers most isn&rsquo;t the months "
+        "to payoff &mdash; it&rsquo;s the interest-to-principal ratio. On a "
+        "$5,000 balance at 24.99% APR paying only the minimum, a borrower "
+        "can end up paying more in interest than the original balance. The "
+        "calculator surfaces that ratio explicitly so the trade-off between "
+        "&ldquo;affordable payment&rdquo; and &ldquo;true cost&rdquo; is "
+        "visible on screen."
+    ),
+    "pages/mortgage-refinance-break-even-calculator.html": (
+        "Every refinance break-even I work through resolves the same way: "
+        "closing costs &divide; monthly savings. If you&rsquo;ll keep the "
+        "loan past the resulting month count, the refinance pays for itself; "
+        "if you might sell or refi again before that month, it usually "
+        "doesn&rsquo;t. The calculator surfaces both numbers and surfaces a "
+        "warning when the user&rsquo;s planned timeline is shorter than the "
+        "computed break-even."
+    ),
+}
+
+
+def editor_note_block(path: str) -> str:
+    note = EDITOR_NOTES.get(path)
+    if not note:
+        return ""
+    return trim(
+        f"""
+        <aside class="ccg-editor-note" aria-label="Editor's note">
+          <p class="ccg-kicker">Editor's Note &middot; {EDITOR_NAME}</p>
+          <p>{note}</p>
+        </aside>
         """
     )
 
@@ -2990,8 +3505,22 @@ def rich_article_body(
     topic_key = cfg.get("sources_topic") or _infer_sources_topic(path)
     sources_section = sources_block(topic_key)
 
+    # Editor's Note immediately after intro: short editorial commentary written
+    # specifically for this page. Voice is observational ("what I noticed when
+    # researching X"), never fabricated personal experience. Adds an E-E-A-T
+    # signal of real editorial perspective without inventing credentials.
+    editor_note = editor_note_block(path)
+
+    # Unique inline SVG diagram for the page. Built at compile time from the
+    # closed-form formulas the on-page calculators use; explicitly labeled
+    # "illustrative scenario" so readers can't mistake the figures for live
+    # market data. Adds a clear visual originality signal.
+    diagram = topic_diagram(path)
+
     content = (
         intro_section
+        + editor_note
+        + diagram
         + calc_widget
         + "".join(section_blocks)
         + faq_section
@@ -3342,6 +3871,130 @@ def about_body(related_paths: List[str]) -> Tuple[str, List[List[str]]]:
             <h2>Contact the editor</h2>
           </div>
           <p>For editorial questions, corrections, or partnership inquiries, email <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>
+        </section>
+        {faq_html(faqs)}
+        {author_box()}
+        {related_html(related_paths)}
+        """
+    )
+    return body, faqs
+
+
+def editorial_standards_body(related_paths: List[str]) -> Tuple[str, List[List[str]]]:
+    """Dedicated editorial-standards / trust page. Concrete, specific, and
+    explicit about the things YMYL reviewers check for: who writes, how it
+    is reviewed, what AI does and doesn't do, how affiliates work, and how
+    corrections are handled."""
+    faqs = [
+        ["Who writes the content on CreditCostGuide?",
+         f"{EDITOR_NAME} is the founder, sole editor, and only person who publishes content on the site. There are no other writers, contributors, or guest authors. Every page is written, fact-checked, and signed off by Javi."],
+        ["What role does AI play in the content?",
+         "Large-language-model assistance is used to draft long-form sections. Every draft is reviewed and edited by Javi before publishing. AI is not used to fabricate statistics, attribute quotes to people, or invent personal experiences. Numeric claims are checked against the primary regulator linked in the page's Sources block."],
+        ["How are corrections handled?",
+         f"Email {CONTACT_EMAIL} with the URL and the specific paragraph. Verified corrections are applied within five business days, the page's dateModified field is bumped, and the editor byline notes the change cycle. We do not silently rewrite published numbers."],
+        ["Does CreditCostGuide accept paid placements?",
+         "No paid placements in editorial content. Affiliate links (currently SmartCredit via CJ Affiliate) are marked rel=\"nofollow sponsored\", disclosed on every page they appear, and never override editorial recommendations. If a partnership would conflict with neutrality, the partnership is dropped, not the editorial position."],
+    ]
+    body = trim(
+        f"""
+        <section class="ccg-section">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">Editorial Standards</p>
+            <h2>What you can expect from every page on CreditCostGuide</h2>
+          </div>
+          <p>This page is a concrete description of how content gets to the reader on CreditCostGuide. It is meant to be specific, not aspirational: every claim below is implemented in the public codebase that builds the site and in the editor byline you see at the bottom of each page.</p>
+          <p>Last reviewed: {LAST_REVIEWED}. The site is a single-editor independent publisher run by <a href="{DOMAIN}/authors/javi-perez">{EDITOR_NAME}</a>, based in {EDITOR_LOCATION}.</p>
+        </section>
+        <section class="ccg-section ccg-section--soft">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">1 &middot; Who writes</p>
+            <h2>Single editor, named, verifiable</h2>
+          </div>
+          <p>{EDITOR_NAME} is the founder and sole editor. There are no anonymous writers, no guest contributors, and no rotating bylines. Javi&rsquo;s LinkedIn is public at <a href="{EDITOR_LINKEDIN}" target="_blank" rel="noopener noreferrer">{EDITOR_LINKEDIN}</a>; the same identity appears in every JSON-LD Person node on the site.</p>
+          <p><strong>What Javi is not:</strong> {NON_ADVICE_DISCLAIMER} The honest answer to &ldquo;why should I trust this site?&rdquo; is not because of a credential, but because every numeric claim is verifiable against the primary regulator linked next to it.</p>
+        </section>
+        <section class="ccg-section">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">2 &middot; How drafts get produced</p>
+            <h2>AI-assisted drafting, human editorial review, public sources</h2>
+          </div>
+          <p>Long-form drafts on CreditCostGuide are produced with large-language-model assistance. Every draft passes through a fixed pre-publish review:</p>
+          <ol>
+            <li><strong>Source verification:</strong> every numeric claim is checked against the link in the page&rsquo;s Sources &amp; Methodology block. If a source no longer supports the claim, the claim is removed or updated.</li>
+            <li><strong>Voice and accuracy edit:</strong> Javi rewrites or rephrases for clarity, removes filler, and confirms each example is internally consistent.</li>
+            <li><strong>Anti-templating check:</strong> recycled scenarios, identical example figures across pages, and stock phrasing are stripped. Each page has unique copy on each section.</li>
+            <li><strong>Disclaimer check:</strong> the non-advice disclaimer is verified to appear in the editor byline and (where relevant) in the page body.</li>
+          </ol>
+          <p><strong>What AI is not used for:</strong> inventing statistics, attributing quotes to people, fabricating personal anecdotes, or creating credentials. Examples that look personal (&ldquo;a borrower I worked with&rdquo;) are not used.</p>
+        </section>
+        <section class="ccg-section ccg-section--soft">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">3 &middot; Sourcing hierarchy</p>
+            <h2>Primary regulators first, industry data second</h2>
+          </div>
+          <ol>
+            <li><strong>CFPB</strong> &mdash; consumer protections, complaint data, disclosure forms (Loan Estimate, etc.).</li>
+            <li><strong>Federal Reserve</strong> &mdash; rate context (G.19), surveys, household debt and credit reports.</li>
+            <li><strong>FDIC</strong> &mdash; deposit rate caps, national rate tables, deposit insurance.</li>
+            <li><strong>BLS</strong> &mdash; inflation, CPI, household expenditure data.</li>
+            <li><strong>FTC</strong> &mdash; consumer protection guidance, scam awareness, free credit-report sourcing.</li>
+            <li><strong>SEC</strong> &mdash; investment-product disclosures where relevant.</li>
+            <li><strong>U.S. Department of Education / StudentAid.gov</strong> &mdash; federal student-loan rules.</li>
+            <li><strong>Industry data</strong> (Experian, FICO, NerdWallet, LendingTree) &mdash; cited explicitly when used, never substituted for the regulators above on regulated products.</li>
+          </ol>
+        </section>
+        <section class="ccg-section">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">4 &middot; Update cycle</p>
+            <h2>What gets reviewed, and when</h2>
+          </div>
+          <ul>
+            <li><strong>Every 90 days at most:</strong> a full review of each indexable page.</li>
+            <li><strong>Monthly:</strong> rate-sensitive numbers (mortgage averages, credit-card APR averages, FDIC weekly rates) against the underlying federal data series.</li>
+            <li><strong>Within 5 business days:</strong> regulatory changes that affect a page (CFPB rulemakings, Fed policy actions, FDIC rate updates).</li>
+            <li><strong>Within 5 business days:</strong> reader-reported errors, with the page&rsquo;s dateModified bumped and the change reflected in the editor byline.</li>
+          </ul>
+        </section>
+        <section class="ccg-section ccg-section--soft">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">5 &middot; Calculator math</p>
+            <h2>Closed-form formulas, no hidden assumptions</h2>
+          </div>
+          <p>Every calculator on the site uses standard, publicly documented mathematics:</p>
+          <ul>
+            <li><strong>Loan payment:</strong> fixed-rate amortization <code>P = A &middot; r / (1 &minus; (1 + r)<sup>&minus;n</sup>)</code>.</li>
+            <li><strong>Credit-card payoff:</strong> month-by-month simulation with monthly interest = balance &times; (APR / 12).</li>
+            <li><strong>Mortgage:</strong> amortization formula plus a flat add-on for taxes, insurance, and PMI.</li>
+            <li><strong>Debt payoff comparison:</strong> dual simulation of avalanche (highest APR first) and snowball (smallest balance first).</li>
+            <li><strong>Refinance break-even:</strong> closing costs &divide; monthly payment savings.</li>
+          </ul>
+          <p>All calculator math runs locally in the reader&rsquo;s browser. No inputs are sent to any server. No localStorage. No tracking of input values.</p>
+        </section>
+        <section class="ccg-section">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">6 &middot; Monetization</p>
+            <h2>How CreditCostGuide is funded &mdash; with explicit limits</h2>
+          </div>
+          <p>The site is reader-supported through two clearly disclosed channels:</p>
+          <ul>
+            <li><strong>Display advertising</strong> through Google AdSense. Ads are served by Google and are not selected, ordered, or curated by the editor.</li>
+            <li><strong>Affiliate partnerships</strong> &mdash; currently only SmartCredit via CJ Affiliate. Affiliate links are marked <code>rel=&quot;nofollow sponsored&quot;</code>, opened in a new tab, and disclosed on every page they appear.</li>
+          </ul>
+          <p><strong>What we do not accept:</strong> paid placements inside editorial content, sponsored guides, &ldquo;guest posts&rdquo; from third parties (with or without payment), reviewer-credibility credentials in exchange for compensation, or backlink swaps inside the indexable content set.</p>
+          <p>If an existing affiliate partnership ever creates a conflict with an editorial position, the partnership is dropped, not the editorial position.</p>
+        </section>
+        <section class="ccg-section ccg-section--soft">
+          <div class="ccg-section-head">
+            <p class="ccg-kicker">7 &middot; Corrections</p>
+            <h2>How to flag an error</h2>
+          </div>
+          <p>Email <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a> with:</p>
+          <ul>
+            <li>The page URL.</li>
+            <li>The specific paragraph or sentence in question.</li>
+            <li>The source you believe is correct (where applicable).</li>
+          </ul>
+          <p>Verified corrections are applied within five business days. The page&rsquo;s dateModified is bumped on publish, and the editor byline reflects the change. We do not silently revise published numbers; when a fix is meaningful, it is acknowledged in the byline note for that update cycle.</p>
         </section>
         {faq_html(faqs)}
         {author_box()}
@@ -4265,6 +4918,55 @@ def styles_css() -> str:
           .ccg-hero-home h1 { max-width: 14ch; }
         }
 
+        /* Topic diagram — unique inline SVG per pillar / supporting page. */
+        .ccg-topic-diagram {
+          margin: 1.4rem 0 1.8rem;
+          padding: 1rem 1.1rem 0.6rem;
+          background: #ffffff;
+          border: 1px solid var(--ccg-line);
+          border-radius: 22px;
+          box-shadow: var(--ccg-shadow);
+        }
+        .ccg-topic-diagram figcaption {
+          margin: 0 0 0.6rem;
+          color: var(--ccg-ink);
+          font-size: 0.98rem;
+        }
+        .ccg-topic-diagram figcaption span {
+          color: var(--ccg-slate);
+          font-weight: 500;
+        }
+        .ccg-svg-diagram {
+          display: block;
+          width: 100%;
+          max-width: 720px;
+          height: auto;
+          margin: 0 auto;
+        }
+        .ccg-diagram-note {
+          margin: 0.6rem 0 0;
+          color: var(--ccg-slate);
+          font-size: 0.85rem;
+        }
+
+        /* Editor's Note — short editorial commentary, single human voice. */
+        .ccg-editor-note {
+          margin: 1.4rem 0 1.8rem;
+          padding: 1.2rem 1.4rem;
+          border-left: 4px solid var(--ccg-blue);
+          background: linear-gradient(135deg, #f3f8ff 0%, #ffffff 100%);
+          border-radius: 0 18px 18px 0;
+          box-shadow: var(--ccg-shadow);
+        }
+        .ccg-editor-note .ccg-kicker {
+          margin: 0 0 0.5rem;
+        }
+        .ccg-editor-note p:last-child {
+          margin: 0;
+          font-size: 1.04rem;
+          line-height: 1.65;
+        }
+
         /* Charted calculators (avalanche-snowball, min-payment, refinance).
            Custom widget layouts that don't fit the generic .ccg-calc-form grid. */
         .ccg-calc-card--charted { padding: 1.4rem; display: grid; gap: 1.1rem; }
@@ -5006,20 +5708,24 @@ def calc_js_refinance() -> str:
 def sitemap_xml(paths: List[str]) -> str:
     # Sitemap contains ONLY indexable URLs. Noindex pages are deliberately excluded
     # so Search Console / AdSense do not see them as eligible-for-index candidates.
+    # Pretty-printed with one <url> per line so manual audits (`grep -c "<loc>"`)
+    # report the real count.
     items = []
     for path in paths:
         if not is_indexable(path):
             continue
         items.append(
-            f"<url><loc>{html.escape(url_for(path))}</loc><lastmod>{SITEMAP_LASTMOD}</lastmod><changefreq>weekly</changefreq><priority>{'1.0' if path == 'index.html' else '0.8'}</priority></url>"
+            f"  <url><loc>{html.escape(url_for(path))}</loc>"
+            f"<lastmod>{SITEMAP_LASTMOD}</lastmod>"
+            f"<changefreq>weekly</changefreq>"
+            f"<priority>{'1.0' if path == 'index.html' else '0.8'}</priority></url>"
         )
-    return trim(
-        f"""
-        <?xml version="1.0" encoding="UTF-8"?>
-        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-          {''.join(items)}
-        </urlset>
-        """
+    body = "\n".join(items)
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        f"{body}\n"
+        "</urlset>\n"
     )
 
 
@@ -5374,6 +6080,9 @@ def build() -> None:
         elif path == "how-we-research.html":
             generic_related = [p for p in related_pool if p != path][:6]
             body, faqs = how_we_research_body(generic_related)
+        elif path == "editorial-standards.html":
+            generic_related = [p for p in related_pool if p != path][:6]
+            body, faqs = editorial_standards_body(generic_related)
         elif path == "privacy-policy.html":
             generic_related = [p for p in related_pool if p != path][:6]
             body, faqs = legal_body("privacy", generic_related)

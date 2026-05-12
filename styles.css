@@ -429,6 +429,55 @@ main { padding-bottom: 5rem; }
   .ccg-hero-home h1 { max-width: 14ch; }
 }
 
+/* Topic diagram — unique inline SVG per pillar / supporting page. */
+.ccg-topic-diagram {
+  margin: 1.4rem 0 1.8rem;
+  padding: 1rem 1.1rem 0.6rem;
+  background: #ffffff;
+  border: 1px solid var(--ccg-line);
+  border-radius: 22px;
+  box-shadow: var(--ccg-shadow);
+}
+.ccg-topic-diagram figcaption {
+  margin: 0 0 0.6rem;
+  color: var(--ccg-ink);
+  font-size: 0.98rem;
+}
+.ccg-topic-diagram figcaption span {
+  color: var(--ccg-slate);
+  font-weight: 500;
+}
+.ccg-svg-diagram {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  height: auto;
+  margin: 0 auto;
+}
+.ccg-diagram-note {
+  margin: 0.6rem 0 0;
+  color: var(--ccg-slate);
+  font-size: 0.85rem;
+}
+
+/* Editor's Note — short editorial commentary, single human voice. */
+.ccg-editor-note {
+  margin: 1.4rem 0 1.8rem;
+  padding: 1.2rem 1.4rem;
+  border-left: 4px solid var(--ccg-blue);
+  background: linear-gradient(135deg, #f3f8ff 0%, #ffffff 100%);
+  border-radius: 0 18px 18px 0;
+  box-shadow: var(--ccg-shadow);
+}
+.ccg-editor-note .ccg-kicker {
+  margin: 0 0 0.5rem;
+}
+.ccg-editor-note p:last-child {
+  margin: 0;
+  font-size: 1.04rem;
+  line-height: 1.65;
+}
+
 /* Charted calculators (avalanche-snowball, min-payment, refinance).
    Custom widget layouts that don't fit the generic .ccg-calc-form grid. */
 .ccg-calc-card--charted { padding: 1.4rem; display: grid; gap: 1.1rem; }
